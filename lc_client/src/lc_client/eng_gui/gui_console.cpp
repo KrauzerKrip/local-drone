@@ -14,7 +14,7 @@
 
 #include "lc_client/exceptions/conpar_exceptions.h"
 #include "lc_client/exceptions/command_exceptions.h"
-#include "lc_client/eng_graphics/openGL/gl_texture.h"
+#include "lc_client/eng_graphics/opengl/gl_texture.h"
 
 
 using namespace ImGui;

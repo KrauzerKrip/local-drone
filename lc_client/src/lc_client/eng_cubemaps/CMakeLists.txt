@@ -11,8 +11,8 @@ target_sources(lc_client
         "cubemap_system.h"
         "cubemap_system.cpp"
 
-        "openGL/gl_cubemap_loader.h"
-        "openGL/gl_cubemap_loader.cpp"
+        "opengl/gl_cubemap_loader.h"
+        "opengl/gl_cubemap_loader.cpp"
 
         "entt/components.h"
 )

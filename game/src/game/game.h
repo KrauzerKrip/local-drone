@@ -3,7 +3,7 @@
 #include "lc_client/i_game_logic.h"
 
 #include "lc_client/eng_graphics/i_window.h"
-#include "lc_client/eng_graphics/openGl/gl_render.h"
+#include "lc_client/eng_graphics/opengl/gl_render.h"
 #include "lc_client/eng_input/i_input.h"
 #include "lc_client/eng_world/world.h"
 #include "lc_client/tier1/tier1.h"
@@ -17,7 +17,7 @@
 #include "lc_client/eng_gui/gui_console.h"
 #include "lc_client/eng_gui/layout/layout_controller.h"
 #include "lc_client/eng_gui/view/gui_presenter.h"
-#include "lc_client/eng_graphics/openGL/gl_shader_loader.h"
+#include "lc_client/eng_graphics/opengl/gl_shader_loader.h"
 #include "lc_client/eng_graphics/gui/text_render.h"
 #include "game/gui/gui.h"
 #include "lc_client/eng_graphics/graphics_settings.h"

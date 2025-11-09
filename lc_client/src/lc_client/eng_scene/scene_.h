@@ -6,7 +6,7 @@
 #include "lc_client/tier1/i_shaders.h"
 #include "lc_client/eng_procedures/graphics_entities_loading.h"
 #include "lc_client/util/i_eng_resource.h"
-#include "lc_client/tier1/openGL/gl_texture_manager.h"
+#include "lc_client/tier1/opengl/gl_texture_manager.h"
 #include "lc_client/eng_scene/scene_loading.h"
 #include "lc_client/eng_scene/skybox.h"
 

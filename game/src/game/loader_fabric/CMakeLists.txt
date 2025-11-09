@@ -4,6 +4,6 @@ project(loader_fabric)
 
 target_sources(game PRIVATE
 	"loader_fabric.h"
-	"openGL/gl_loader_fabric.h"
-	"openGL/gl_loader_fabric.cpp"
+	"opengl/gl_loader_fabric.h"
+	"opengl/gl_loader_fabric.cpp"
 )
