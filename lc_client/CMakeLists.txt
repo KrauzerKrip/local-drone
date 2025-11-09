@@ -2,10 +2,10 @@ cmake_minimum_required (VERSION 3.13)
 
 project(lc_client)
 
-include(E:/Industry/industry/vcpkg/scripts/buildsystems/vcpkg.cmake)
+add_library(glad ../libs/glad/src/glad.c)
+target_include_directories(glad PUBLIC ../libs/glad/include)
 
 find_package(glfw3 CONFIG REQUIRED)
-find_package(glad CONFIG REQUIRED)
 find_package(EnTT CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
@@ -14,10 +14,9 @@ find_package(nlohmann_json CONFIG REQUIRED)
 find_path(LUABRIDGE_INCLUDE_DIRS "LuaBridge/List.h")
 find_package(Lua REQUIRED)
 find_package(imgui CONFIG REQUIRED)
-find_package(freetype CONFIG REQUIRED)
+find_package(Freetype REQUIRED)
 
-
-target_link_libraries(lc_client PUBLIC glfw glad::glad EnTT::EnTT)
+target_link_libraries(lc_client PUBLIC glfw glad EnTT::EnTT)
 target_link_libraries(lc_client PUBLIC glm::glm)
 target_link_libraries(lc_client PRIVATE assimp::assimp)
 target_link_libraries(lc_client PRIVATE pugixml::pugixml)
@@ -26,20 +25,20 @@ target_include_directories(lc_client PRIVATE ${LUABRIDGE_INCLUDE_DIRS})
 target_include_directories(lc_client PRIVATE ${LUA_INCLUDE_DIR})
 target_link_libraries(lc_client PRIVATE ${LUA_LIBRARIES})
 target_link_libraries(lc_client PRIVATE imgui::imgui)
-target_link_libraries(lc_client PRIVATE freetype)
+target_link_libraries(lc_client PRIVATE Freetype::Freetype)
 
 #target_link_libraries(lc_client PRIVATE eng::rc)
-target_link_libraries(lc_client PRIVATE stb)   
+target_link_libraries(lc_client PRIVATE stb)
 
-target_sources(lc_client 
+target_sources(lc_client
     PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/src/lc_client/i_game_logic.h"
 
         "${CMAKE_CURRENT_SOURCE_DIR}/src/lc_client/loop.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/lc_client/loop.h"
 
-        
-        
+
+
  )
 
 add_subdirectory("include/ldk_client/local_engine")
