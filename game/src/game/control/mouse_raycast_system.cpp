@@ -14,20 +14,20 @@ void MouseRaycastSystem::input() {
 	RaycastResult result = m_pMouseRaycast->doMouseRaycast();
 	if (result.entityIntersectedWith.has_value()) {
 		for (MouseRaycastObserver* pObserver : m_observers) {
-			pObserver->onMouseMove(result.entityIntersectedWith.value(), 
-				result.intersectionPoint.value(), 
+			pObserver->onMouseMove(result.entityIntersectedWith.value(),
+				result.intersectionPoint.value(),
 				result.intersectionDistance.value());
 		}
 	}
 }
 
-void MouseRaycastSystem::addObserver(std::string action, MouseRaycastObserver* pObserver) { 
+void MouseRaycastSystem::addObserver(std::string action, MouseRaycastObserver* pObserver) {
 	m_observers.push_back(pObserver);
 
-	m_pActionControl->addActionCallback(action, [=]() { onAction(action, pObserver); });
+	m_pActionControl->addActionCallback(action, [this, action, pObserver]() { this->onAction(action, pObserver); });
 }
 
-void MouseRaycastSystem::removeObserver(MouseRaycastObserver* pObserver) { 
+void MouseRaycastSystem::removeObserver(MouseRaycastObserver* pObserver) {
 	for (auto i = m_observers.begin(); i != m_observers.end(); ++i) {
 		if (*i == pObserver) {
 			m_observers.erase(i);

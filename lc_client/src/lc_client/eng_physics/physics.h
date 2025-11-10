@@ -12,12 +12,12 @@ public:
 	Physics(entt::registry* pRegistry);
 
 	template <typename... Components, typename... Exclude>
-	RaycastResult raycast(RaycastQuery query, entt::exclude_t<Exclude...> exclude = {});
+	RaycastResult raycast(RaycastQuery query, entt::exclude_t<Exclude...> exclude = entt::exclude_t{});
 
 private:
 	template <typename... Components, typename... Exclude>
 	std::unordered_map<entt::entity, RaycastIntersection> getIntersections(
-		RaycastQuery query, entt::exclude_t<Exclude...> exclude = {});
+		RaycastQuery query, entt::exclude_t<Exclude...> exclud = entt::exclude_t{});
 	std::pair<entt::entity, RaycastIntersection> getMinimumDistanceIntersection(
 		std::unordered_map<entt::entity, RaycastIntersection>& intersections);
 

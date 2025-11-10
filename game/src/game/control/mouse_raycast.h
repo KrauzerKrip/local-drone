@@ -17,7 +17,7 @@ public:
 	entt::registry* pRegistry);
 
 	template <typename... Components, typename... Exclude>
-	RaycastResult doMouseRaycast(entt::exclude_t<Exclude...> exclude = {});
+	RaycastResult doMouseRaycast(entt::exclude_t<Exclude...> exclude = entt::exclude_t{});
 
 private:
 	IInput* m_pInput = nullptr;

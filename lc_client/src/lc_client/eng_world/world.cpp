@@ -4,7 +4,7 @@
 
 
 
-World::World(eng::IResource* pResource, SceneLoading* pSceneLoading) { 
+World::World(eng::IResource* pResource, SceneLoading* pSceneLoading) {
 	m_pResource = pResource;
 	m_pSceneLoading = pSceneLoading;
 }
@@ -12,16 +12,16 @@ World::World(eng::IResource* pResource, SceneLoading* pSceneLoading) {
 World::~World() {}
 
 void World::loadScene(std::string pack, std::string scene) {
-	m_registry.each([this](entt::entity entity) {
-		if (!m_registry.all_of<MapEntity>(entity)) {
+    for(auto entity: m_registry.view<entt::entity>()) {
+        if (!m_registry.all_of<MapEntity>(entity)) {
 			m_registry.destroy(entity);
 		}
-		}); 
-	m_utilRegistry.each([this](entt::entity entity) {
+    }
+    for(auto entity: m_registry.view<entt::entity>()) {
 		if (!m_utilRegistry.all_of<MapEntity>(entity)) {
 			m_utilRegistry.destroy(entity);
 		}
-	}); 
+	};
 
 
 	m_pSceneLoading->loadScene(pack + "/scenes/" + scene + "/scene.xml", m_registry);
