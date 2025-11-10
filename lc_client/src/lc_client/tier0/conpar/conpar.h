@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include <type_traits>
+#include <cstdint>
 
 #include "lc_client/exceptions/conpar_exceptions.h"
 
@@ -28,7 +30,7 @@ public:
 	ConPar(std::string name, T value, ConparFlags flags);
 	ConPar(std::string name, T value);
 	const std::string getName() const;
-	const std::vector<ConparFlags>& getFlags() const;
+	const ConparFlags getFlags() const;
 	bool checkFlag(const ConparFlags flag) const;
 	void setCallback(std::function<void(T value)> callback);
 
@@ -56,7 +58,7 @@ ConPar<T>::ConPar(std::string name, T value, ConparFlags flags) : m_name(name),
 
 template <IsAppliableType T> const std::string ConPar<T>::getName() const { return m_name; }
 
-template <IsAppliableType T> const std::vector<ConparFlags>& ConPar<T>::getFlags() const { return m_flags; }
+template <IsAppliableType T> const ConparFlags ConPar<T>::getFlags() const { return m_flags; }
 
 template <IsAppliableType T> bool ConPar<T>::checkFlag(const ConparFlags flag) const {
 	return ((m_flags & flag) != ConparFlags::NONE);
@@ -80,7 +82,7 @@ template <IsAppliableType T> void ConPar<T>::setValue(T value) {
 	}
 }
 
-template <IsAppliableType T> inline void ConPar<T>::setValueConvert(std::string value){}; 
+template <IsAppliableType T> inline void ConPar<T>::setValueConvert(std::string value){};
 
 template <> inline void ConPar<bool>::setValueConvert(std::string value) {
 	if (checkFlag(ConparFlags::CONSTANT)) {
