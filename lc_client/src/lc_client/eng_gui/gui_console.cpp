@@ -131,25 +131,25 @@ void ConsoleGui::update() {
 		PushTextWrapPos(0.0f);
 
 		if (message.type == MessageType::DEV_MESSAGE) {
-			TextColored(ImVec4(52 / 255.0f, 152 / 255.0f, 219 / 255.0f, 1.0f), message.text.c_str());
+			TextColored(ImVec4(52 / 255.0f, 152 / 255.0f, 219 / 255.0f, 1.0f), "%s",  message.text.c_str());
 		}
 		else if (message.type == MessageType::MESSAGE) {
-			TextColored(ImVec4(46 / 255.0f, 204 / 255.0f, 113 / 255.0f, 1.0f), message.text.c_str());
+			TextColored(ImVec4(46 / 255.0f, 204 / 255.0f, 113 / 255.0f, 1.0f),  "%s",  message.text.c_str());
 		}
 		else if (message.type == MessageType::WARN) {
-			TextColored(ImVec4(231 / 255.0f, 76 / 255.0f, 60 / 255.0f, 1.0f), message.text.c_str());
+			TextColored(ImVec4(231 / 255.0f, 76 / 255.0f, 60 / 255.0f, 1.0f), "%s",  message.text.c_str());
 		}
 		else if (message.type == MessageType::ANSWER) {
 			auto str = "^ \n" + message.text;
-			Text(str.c_str());
+			Text("%s", str.c_str());
 		}
 		else if (message.type == MessageType::ANSWER_ERROR) {
 			auto str = "^ \n" + message.text;
-			TextColored(ImVec4(231 / 255.0f, 76 / 255.0f, 60 / 255.0f, 1.0f), str.c_str());
+			TextColored(ImVec4(231 / 255.0f, 76 / 255.0f, 60 / 255.0f, 1.0f), "%s", str.c_str());
 		}
 		else if (message.type == MessageType::USER_INPUT) {
 			auto str = "> " + message.text;
-			TextColored(ImVec4(189 / 255.0f, 195 / 255.0f, 199 / 255.0f, 1.0f), str.c_str());
+			TextColored(ImVec4(189 / 255.0f, 195 / 255.0f, 199 / 255.0f, 1.0f), "%s", str.c_str());
 		}
 
 		PopTextWrapPos();

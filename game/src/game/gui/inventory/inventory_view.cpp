@@ -5,7 +5,7 @@
 using namespace ImGui;
 
 
-InventoryView::InventoryView(const GuiDependencies& dependencies) { 
+InventoryView::InventoryView(const GuiDependencies& dependencies) {
 	m_enable = false;
 	m_position = glm::vec2(0);
 }
@@ -31,9 +31,9 @@ void InventoryView::frame() {
 	if (Begin(m_windowName.c_str(), NULL,
 			ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus)) {
 		for (auto& [k, v] : m_data) {
-			ImGui::Text(k.c_str());
+			ImGui::Text("%s", k.c_str());
 			SameLine();
-			ImGui::Text(std::to_string(v).c_str());
+			ImGui::Text("%s", std::to_string(v).c_str());
 		}
 		End();
 	}
