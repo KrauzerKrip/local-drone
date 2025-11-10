@@ -59,7 +59,7 @@ void TextRenderGl::render(
 
 void TextRenderGl::renderCentered(
 	std::string text, glm::vec4 color, glm::vec2 centerAbsolutePosition, unsigned int size, float zOffset) {
-	
+
 	std::string::const_iterator c;
 
 	float scale = float(size) / 48.0f;
@@ -159,7 +159,7 @@ void TextRenderGl::reload() {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		// now store character for later use
 		Character character = {texture, glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-			glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top), face->glyph->advance.x};
+			glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top), static_cast<unsigned int>(face->glyph->advance.x)};
 		m_characters.insert(std::pair<char, Character>(c, character));
 	}
 
