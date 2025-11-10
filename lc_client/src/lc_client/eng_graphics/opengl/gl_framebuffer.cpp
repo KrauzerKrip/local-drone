@@ -38,13 +38,13 @@ Framebuffer::Framebuffer(int width, int height, TextureType textureType) {
 
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_rbo);
 
-    _ASSERT_EXPR(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE,
+    assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE &&
 			"ERROR::FRAMEBUFFER:: Framebuffer is not complete!");
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-Framebuffer::~Framebuffer() { 
+Framebuffer::~Framebuffer() {
 	glDeleteFramebuffers(1, &m_fbo);
 	glDeleteRenderbuffers(1, &m_rbo);
 	glDeleteTextures(1, &m_texture);

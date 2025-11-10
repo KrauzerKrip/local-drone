@@ -1,5 +1,6 @@
 #include "texture_manager.h"
 
+#include <cassert>
 #include <iostream>
 #include <stdexcept>
 #include <memory>
@@ -9,7 +10,7 @@
 #include "lc_client/tier0/tier0.h"
 
 
-TextureManager::TextureManager(eng::IResource* pResource) { 
+TextureManager::TextureManager(eng::IResource* pResource) {
 	m_pResource = pResource;
 }
 
@@ -20,7 +21,7 @@ Texture* TextureManager::getTexture(std::string path) {
 	catch (std::out_of_range) {
 		std::cout << "Texture '" << path << "' not found in cache, will try to load." << std::endl;
 		Texture* pTexture = nullptr;
-		
+
 		try {
 			pTexture = loadTexture(path);
 			m_textureMap.emplace(path, pTexture);
@@ -41,11 +42,11 @@ Texture* TextureManager::getTexture(std::string path) {
 
 		if (pTexture == nullptr) {
 			std::string str = "TextureManagerGL: pTexture is nullptr. Path given: " + path;
-			_ASSERT(str.c_str());
+			assert(str.c_str());
 		}
 
 		return pTexture;
-		
+
 	}
 }
 
@@ -80,7 +81,7 @@ void TextureManager::reload() {
 
 		if (pTexture == nullptr) {
 			std::string str = "TextureManagerGL: pTexture is nullptt. Path given: " + path;
-			_ASSERT(str.c_str());
+			assert(str.c_str());
 		}
 	}
 }
