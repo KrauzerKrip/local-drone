@@ -18,5 +18,7 @@ add_subdirectory("game")
 
 set(CMAKE_CXX_SCAN_FOR_MODULES true)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 target_include_directories(game PRIVATE lc_client)
 target_link_libraries(game lc_client)

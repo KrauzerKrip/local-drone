@@ -2,6 +2,8 @@ cmake_minimum_required (VERSION 3.13)
 
 project(lc_client)
 
+target_compile_definitions(lc_client PUBLIC GLM_ENABLE_EXPERIMENTAL)
+
 add_library(glad ../libs/glad/src/glad.c)
 target_include_directories(glad PUBLIC ../libs/glad/include)
 
