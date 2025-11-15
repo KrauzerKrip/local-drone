@@ -195,7 +195,7 @@ void ConsoleGui::update() {
 	}
 
 	ImGui::PushItemWidth(GetWindowWidth() - 128);
-	if (InputText(" ", &m_commandText, inputTextFlags, &textEditCallbackStub, (void*)this)) {
+	if (ImGui::InputText(" ", &m_commandText, inputTextFlags, &textEditCallbackStub, (void*)this)) {
 		enterCommand(m_commandText);
 		m_commandText.clear();
 	}

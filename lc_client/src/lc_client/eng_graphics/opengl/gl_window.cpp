@@ -1,9 +1,11 @@
 #include "gl_window.h"
 
+#include <GLFW/glfw3.h>
 #include <iostream>
 #include <cmath>
 #include <string>
 
+#include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
@@ -44,11 +46,13 @@ WindowGL::WindowGL(std::string title, int width, int height, int* aspectRatio) {
 	}
 
 	std::cout << "glfwInit 1" << std::endl;
-	std::cout << glfwInit() << std::endl;
+	if (glfwInit() == GLFW_FALSE) {
+	    throw GlfwInitFailException();
+	}
 	std::cout << "glfwInit 2" << std::endl;
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, true);
 	glfwWindowHint(GLFW_DECORATED, true);
@@ -79,7 +83,6 @@ void WindowGL::init() {
 
 	if (m_pGlfwWindow == nullptr) {
 		throw GlfwWindowFailException();
-		glfwTerminate();
 	}
 
 	glfwMakeContextCurrent(m_pGlfwWindow);
@@ -88,7 +91,7 @@ void WindowGL::init() {
 		throw GladInitFailException();
 	}
 
-	GLint flags; 
+	GLint flags;
 	glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
 	if (flags & GL_CONTEXT_FLAG_DEBUG_BIT) {
 		glEnable(GL_DEBUG_OUTPUT);
@@ -103,14 +106,14 @@ void WindowGL::init() {
 		std::cout << "OpenGL Error: OpenGL debug context wasn`t created." << std::endl;
 	}
 
-	glViewport(0, 0, m_width, m_height); 
+	glViewport(0, 0, m_width, m_height);
 	// glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClearColor(117.0f / 255, 187.0f / 255, 253.0f / 255, 1.0f);
 	// glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
 	if (m_vSync) {
 		glfwSwapInterval(1);
-	} 
+	}
 	else {
 		glfwSwapInterval(0);
 	}
@@ -123,7 +126,7 @@ void WindowGL::init() {
 	glfwSetScrollCallback(m_pGlfwWindow, mouseWheelCallback);
 
 	ImGui_ImplGlfw_InitForOpenGL(m_pGlfwWindow, true);
-	ImGui_ImplOpenGL3_Init("#version 400");
+	ImGui_ImplOpenGL3_Init("#version 460");
 
 	glfwSetWindowAspectRatio(m_pGlfwWindow, m_pAspectRatio[0], m_pAspectRatio[1]);
 
@@ -134,7 +137,7 @@ void WindowGL::init() {
 	m_debug = true;
 
 	glfwMaximizeWindow(m_pGlfwWindow);
-	
+
 	m_creationCallback();
 }
 
@@ -149,7 +152,7 @@ void WindowGL::frame() {
 	glfwPollEvents();
 }
 
-void WindowGL::startFrame() { 
+void WindowGL::startFrame() {
 	if (m_shouldWindowResize) {
 		this->resize();
 		m_shouldWindowResize = false;
@@ -194,7 +197,7 @@ void WindowGL::setResizeCallback(std::function<void(int, int)> callback) { m_res
 void WindowGL::setCreationCallback(std::function<void()> callback) { m_creationCallback = callback; }
 
 GLFWwindow* WindowGL::getGlfwWindow() {
-	return m_pGlfwWindow; 
+	return m_pGlfwWindow;
 }
 
 std::function<void(int, int)>& WindowGL::getResizeCallback() { return m_resizeCallback; }
@@ -218,11 +221,11 @@ int* WindowGL::getAspectRatio() {
 	return m_pAspectRatio;
 }
 
-void WindowGL::setTargetFps(unsigned int fps) { 
+void WindowGL::setTargetFps(unsigned int fps) {
 	m_targetFps = fps;
 }
 
-void WindowGL::setVSync(bool vSync) { 
+void WindowGL::setVSync(bool vSync) {
 	m_vSync = vSync;
 }
 
@@ -280,7 +283,7 @@ void WindowGL::resize() {
 	m_resizeCallback(m_width, m_height);
 }
 
-void WindowGL::setWindowMode(WindowMode mode) { 
+void WindowGL::setWindowMode(WindowMode mode) {
 	m_windowMode = mode;
 
 	if (m_windowMode == WindowMode::WINDOWED) {

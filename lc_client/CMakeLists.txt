@@ -7,6 +7,12 @@ target_compile_definitions(lc_client PUBLIC GLM_ENABLE_EXPERIMENTAL)
 add_library(glad ../libs/glad/src/glad.c)
 target_include_directories(glad PUBLIC ../libs/glad/include)
 
+find_package(OpenGL REQUIRED)
+target_link_libraries(lc_client
+    PUBLIC
+        OpenGL::GL
+)
+
 find_package(glfw3 CONFIG REQUIRED)
 find_package(EnTT CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
@@ -38,9 +44,6 @@ target_sources(lc_client
 
         "${CMAKE_CURRENT_SOURCE_DIR}/src/lc_client/loop.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/lc_client/loop.h"
-
-
-
  )
 
 add_subdirectory("include/ldk_client/local_engine")

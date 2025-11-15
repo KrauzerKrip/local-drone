@@ -13,9 +13,10 @@
 Tier0::Tier0() {
 	m_pParameters = new Parameters();
 	initParameters(*m_pParameters);
-	
+
 	m_pConsole = new Console(m_pParameters);
 
+	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 
 	m_pImGuiFonts = new ImGuiFonts();

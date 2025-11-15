@@ -59,6 +59,18 @@
                     nlohmann_json
                     pugixml
                     luabridge
+
+                    xorg.libX11
+                    xorg.libXext
+                    xorg.libXrandr
+                    xorg.libXrender
+                    xorg.libXfixes
+                    xorg.libXcursor
+                    xorg.libXi
+
+                    mesa
+                    libGL
+                    libGLU
                   ]
                   ++ (if system == "aarch64-darwin" then [ ] else [ gdb ]);
               };

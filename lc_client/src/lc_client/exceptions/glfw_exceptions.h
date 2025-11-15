@@ -6,3 +6,8 @@ class GlfwWindowFailException : public std::runtime_error {
 public:
 	GlfwWindowFailException() : std::runtime_error("Failed to create GLFW window.") { }
 };
+
+class GlfwInitFailException : public std::runtime_error {
+public:
+	GlfwInitFailException() : std::runtime_error("Failed to initialize GLFW.") { }
+};
