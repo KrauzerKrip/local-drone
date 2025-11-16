@@ -1,4 +1,5 @@
 #include "graphics.h"
+#include <cstdio>
 
 
 Graphics::Graphics(Tier0* pTier0, IWindow* pWindow, eng::IResource* pResource, World* pWorld,
@@ -21,12 +22,12 @@ Graphics::Graphics(Tier0* pTier0, IWindow* pWindow, eng::IResource* pResource, W
 		pWindow->setTargetFps(pGraphicsSettings->getTargetFps());
 		pWindow->setWindowMode(pGraphicsSettings->getWindowMode());
 	});
-	
+
 	m_loaderFabric = std::make_unique<LoaderFabricGl>(pResource, pTier0->getConsole());
 
 	m_textureManager = std::make_unique<TextureManagerGl>(m_pResource);
 
-	m_modelManager = std::make_unique<ModelManager>(m_textureManager.get(), 
+	m_modelManager = std::make_unique<ModelManager>(m_textureManager.get(),
 		pResource, pWorld->getUtilRegistry(), pTier0->getConsole());
 	m_modelParser = std::make_unique<ModelParser>(pResource);
 
@@ -40,7 +41,7 @@ Graphics::Graphics(Tier0* pTier0, IWindow* pWindow, eng::IResource* pResource, W
 	m_render->setDependecies(m_pWorld);
 }
 
-void Graphics::init() { 
+void Graphics::init() {
 	m_shaderManager.reset();
 	m_shaderManager = std::make_unique<ShaderManagerGl>(m_pResource);
 	m_shaderManager->loadShaders();
@@ -53,6 +54,10 @@ void Graphics::init() {
 		static_cast<TextureManager*>(m_textureManager.get()), m_loaderFabric->getShaderLoaderGl(),
 		m_loaderFabric->getMeshLoader(), m_loaderFabric->getCubemapLoader(), m_pWorld, m_modelManager.get(),
 		m_modelParser.get(), static_cast<SkyboxRender*>(m_skyboxRender.get()), m_pResource);
+
+
+	auto size = m_graphicsSettings->getWindowSize();
+	m_pWindow->setSize(size.at(0), size.at(1));
 
 	m_render->init();
 }

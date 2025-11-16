@@ -34,9 +34,9 @@ unsigned int ShaderLoaderGl::createShaderProgram(std::string vertexShaderName, s
 
 	int success;
 	char infoLog[512];
-	glGetProgramiv(shaderProgram, GL_COMPILE_STATUS, &success);
+	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
 
-	if (success) {
+	if (success == GL_TRUE) {
 		std::cout << "gl_shader_loader: shader program linked successfully: " << shaderProgram << std::endl;
 	}
 	else {

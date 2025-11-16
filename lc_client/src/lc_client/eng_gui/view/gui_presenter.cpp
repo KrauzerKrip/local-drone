@@ -1,5 +1,6 @@
 #include "gui_presenter.h"
 
+#include <cstdio>
 #include <iostream>
 #include <imgui.h>
 
@@ -9,7 +10,7 @@
 GuiPresenter::GuiPresenter() {
 }
 
-void GuiPresenter::render() { 
+void GuiPresenter::render() {
 	m_pBackgroundRender->frame();
 	m_pTextRender->frame();
 
@@ -19,16 +20,16 @@ void GuiPresenter::render() {
 		pWidget->render();
 	}
 
+
 	for (QueueRender* pQueueRender : m_queueRenders) {
 		pQueueRender->renderQueue();
 	}
-
 
 	std::vector<Widget*> widgets = m_pLayoutController->getWidgets();
 
 	for (Widget* pWidget : widgets) {
 		pWidget->render();
-	} 
+	}
 
 	for (QueueRender* pQueueRender : m_queueRenders) {
 		pQueueRender->renderQueue();

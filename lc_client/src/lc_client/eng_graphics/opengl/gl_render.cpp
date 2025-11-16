@@ -8,6 +8,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "lc_client/eng_graphics/entt/components.h"
+#include "lc_client/eng_graphics/opengl/gl_framebuffer.h"
 #include "lc_client/eng_graphics/texture.h"
 #include "lc_client/eng_model/entt/components.h"
 #include "lc_client/eng_lighting/entt/components.h"
@@ -55,6 +56,13 @@ void RenderGL::init() {
 }
 
 void RenderGL::render() {
+    Framebuffer* pFramebuffer = m_pFramebufferController->getFramebuffer();
+
+    #ifdef LE_DEBUG
+    // @TODO: better add Framebuffer::resize that reallocates framebuffer attachments, i.e textures and etc
+    assert(pFramebuffer != nullptr && "couldn't get framebuffer from controller");
+    #endif
+
 	m_pFramebufferController->getFramebuffer()->bind();
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -102,7 +110,7 @@ void RenderGL::cleanUp() {}
 void RenderGL::setDependecies(World* pWorld) {
 	m_pRegistry = &pWorld->getRegistry();
 	m_pUtilRegistry = &pWorld->getUtilRegistry();
-	
+
 	m_pLighting = new LightingGl(m_pRegistry, m_pCamera);
 
     m_pMeshRender = new MeshRenderGl(m_pUtilRegistry);
@@ -130,4 +138,3 @@ void RenderGL::createFramebufferVao() {
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 }
-

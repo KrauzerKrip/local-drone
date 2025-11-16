@@ -86,7 +86,7 @@ void TextRenderGl::renderCentered(
 	glUseProgram(m_shader);
 	unsigned int projLoc = glGetUniformLocation(m_shader, "projection");
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(m_projection));
-	glUniform3f(glGetUniformLocation(m_shader, "textColor"), color.x, color.y, color.z);
+	glUniform4f(glGetUniformLocation(m_shader, "textColor"), color.x, color.y, color.z, 1.0);
 	setUniform(m_shader, "textColor", color);
 	setUniform(m_shader, "zOffset", zOffset);
 
@@ -131,7 +131,7 @@ void TextRenderGl::reload() {
 		std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
 	}
 	FT_Face face;
-	if (FT_New_Face(ft, "C:\\Windows\\Fonts\\arial.ttf", 0, &face)) {
+	if (FT_New_Face(ft, "/home/krauzerkrip/projects/games/industry/local/res/dev/fonts/IBM_Plex_Mono/IBMPlexMono-Regular.ttf", 0, &face)) {
 		m_pConsole->warn("ERROR::FREETYPE: Failed to load font");
 		std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
 	}
