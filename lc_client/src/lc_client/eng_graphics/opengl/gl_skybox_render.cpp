@@ -11,6 +11,9 @@
 
 SkyboxRenderGl::SkyboxRenderGl(ShaderLoaderGl* pShaderWork) {
 	m_pShaderLoader = pShaderWork;
+	m_texture = 0;
+	m_shader = 0;
+	m_shader = 0;
 }
 
 void SkyboxRenderGl::load(CubemapMaterial* pMaterial) {
@@ -28,7 +31,7 @@ void SkyboxRenderGl::load(CubemapMaterial* pMaterial) {
 	else {
 		imageFormat = GL_RGB;
 	}
-	
+
 	glGenTextures(1, &m_texture);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, m_texture);
 
@@ -81,6 +84,9 @@ void SkyboxRenderGl::load(CubemapMaterial* pMaterial) {
 }
 
 void SkyboxRenderGl::render(glm::mat4& projection, glm::mat4& view) {
+    if (m_texture == 0) {
+        return;
+    }
 	glDepthMask(GL_FALSE);
 	glUseProgram(m_shader);
 
@@ -101,7 +107,7 @@ void SkyboxRenderGl::render(glm::mat4& projection, glm::mat4& view) {
 
 void SkyboxRenderGl::bindTexture() { glBindTexture(GL_TEXTURE_CUBE_MAP, m_texture); }
 
-void SkyboxRenderGl::reload() { 
+void SkyboxRenderGl::reload() {
 	m_shader = m_pShaderLoader->createShaderProgram("skybox", "skybox");
 
 	if (m_pMaterial != nullptr) {
