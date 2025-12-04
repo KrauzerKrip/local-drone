@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
@@ -28,7 +29,7 @@ struct Character {
 
 class TextRenderGl : public TextRender {
 public:
-	TextRenderGl(IWindow* pWindow, IConsole* pConsole, ShaderLoaderGl* pShaderLoader);
+	TextRenderGl(IWindow* pWindow, IConsole* pConsole, ShaderLoaderGl* pShaderLoader, std::filesystem::path font);
 
 	void render(std::string text, glm::vec4 color, glm::vec2 absolutePosition, unsigned int size, float zOffset) override;
 	void renderCentered(
@@ -42,6 +43,7 @@ private:
 	unsigned int m_vao;
 	unsigned int m_vbo;
 	glm::mat4 m_projection;
+	std::filesystem::path m_fontPath;
 
 	IWindow* m_pWindow = nullptr;
 	ShaderLoaderGl* m_pShaderLoader = nullptr;

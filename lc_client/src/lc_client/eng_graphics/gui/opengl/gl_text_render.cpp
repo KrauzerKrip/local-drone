@@ -1,12 +1,15 @@
 #include "gl_text_render.h"
 
+#include <filesystem>
 #include <glad/glad.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include<glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include "lc_client/eng_graphics/opengl/gl_shader_uniform.h"
 
-TextRenderGl::TextRenderGl(IWindow* pWindow, IConsole* pConsole, ShaderLoaderGl* pShaderLoader) : TextRender(pConsole) {
+TextRenderGl::TextRenderGl(IWindow* pWindow, IConsole* pConsole, ShaderLoaderGl* pShaderLoader, std::filesystem::path font) :
+TextRender(pConsole),
+m_fontPath(font) {
 	m_pWindow = pWindow;
 	m_pShaderLoader = pShaderLoader;
 }
@@ -131,7 +134,7 @@ void TextRenderGl::reload() {
 		std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
 	}
 	FT_Face face;
-	if (FT_New_Face(ft, "/home/krauzerkrip/projects/games/industry/local/res/dev/fonts/IBM_Plex_Mono/IBMPlexMono-Regular.ttf", 0, &face)) {
+	if (FT_New_Face(ft, m_fontPath.c_str(), 0, &face)) {
 		m_pConsole->warn("ERROR::FREETYPE: Failed to load font");
 		std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
 	}

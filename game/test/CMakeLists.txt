@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.13)
 
 project(game_tests_project)
 
-include(CTest) 
+include(CTest)
 #include(GoogleTest)
 
 add_executable(game_tests_project)

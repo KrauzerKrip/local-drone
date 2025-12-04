@@ -5,14 +5,15 @@
 #include "console/console.h"
 #include "imgui_fonts.h"
 #include "logger/logger.h"
+#include <filesystem>
 
 /**
- * 
- * 
+ *
+ *
  */
 class Tier0 {
 public:
-	Tier0();
+	Tier0(std::filesystem::path resourceDir);
 	~Tier0();
 
 	Parameters* getParameters();

@@ -10,7 +10,7 @@
 #include "logger/logger_console.h"
 
 
-Tier0::Tier0() {
+Tier0::Tier0(std::filesystem::path resourceDir) {
 	m_pParameters = new Parameters();
 	initParameters(*m_pParameters);
 
@@ -19,7 +19,7 @@ Tier0::Tier0() {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 
-	m_pImGuiFonts = new ImGuiFonts();
+	m_pImGuiFonts = new ImGuiFonts(resourceDir);
 
 	m_pIConsole = m_pConsole;
 

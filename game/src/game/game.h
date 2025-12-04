@@ -30,11 +30,12 @@
 #include "economy/components.h"
 #include "game_systems.h"
 #include "character/character_system.h"
+#include <filesystem>
 
 
 class Game : public IGameLogic {
 public:
-	Game(IWindow *pWindow, Tier0* pTier0);
+	Game(IWindow *pWindow, Tier0* pTier0, std::filesystem::path resourceDir);
 	virtual ~Game();
 
 	void init();

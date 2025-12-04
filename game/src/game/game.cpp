@@ -54,10 +54,10 @@
 #include "game_conpars_init.h"
 
 
-Game::Game(IWindow* pWindow, Tier0* pTier0) {
+Game::Game(IWindow* pWindow, Tier0* pTier0, std::filesystem::path resourceDir) {
 	m_pWindow = pWindow;
 	m_pCamera = new Camera();
-	m_pResource = new eng::Resource("E:/Industry/industry/res/"); 
+	m_pResource = new eng::Resource(resourceDir.string() + "/");
 	m_pTier0 = pTier0;
 	m_pTier1 = new Tier1(m_pResource, pTier0);
 
@@ -76,13 +76,14 @@ Game::Game(IWindow* pWindow, Tier0* pTier0) {
 
 	m_pGraphics = new Graphics(m_pTier0, m_pWindow, m_pResource, m_pWorld, m_pCamera, pGuiPresenter);
 
+	const auto fontPath = resourceDir / "dev/fonts/IBM_Plex_Mono/IBMPlexMono-Regular.ttf";
 	GuiDependenciesFabric* pGuiDependenciesFabric = new GuiDependenciesFabricGl(m_pTier0->getConsole(), m_pGraphics->getLoaderFabric()->getShaderLoaderGl(),
-			m_pInput, m_pGraphics->getTextureManager(), m_pGraphics->getFramebufferController(), m_pWindow);
+			m_pInput, m_pGraphics->getTextureManager(), m_pGraphics->getFramebufferController(), m_pWindow, fontPath);
 
 	m_pGui = new Gui(pGuiPresenter, m_pTier0, pGuiDependenciesFabric, m_pInput, m_pActionControl, m_pGraphics->getSettings(),
 		m_pCamera, &m_pWorld->getRegistry());
 
-	m_pWindow->setCreationCallback([this, pGuiDependenciesFabric]() { 
+	m_pWindow->setCreationCallback([this, pGuiDependenciesFabric]() {
 		m_pGraphics->init();
 		pGuiDependenciesFabric->getDependencies().pBackgroundRender->reload();
 		pGuiDependenciesFabric->getDependencies().pTextRender->reload();
@@ -177,7 +178,7 @@ void Game::init() {
 		}
 	});
 
-	m_pInput->addMappedKeyCallback(KeyCode::F11, [this]() { 
+	m_pInput->addMappedKeyCallback(KeyCode::F11, [this]() {
 		ConPar<std::string>& conpar = m_pTier0->getParameters()->getParameter<std::string>("gh_window_mode");
 		if (conpar.getValue() == "fullscreen") {
 			conpar.setValue("windowed");
@@ -228,11 +229,11 @@ void Game::init() {
 	pRegistry->emplace<BlueprintTrader>(trader);
 	Trader& traderComponent = pRegistry->emplace<Trader>(trader);
 	pRegistry->emplace<Properties>(trader);
-	pRegistry->emplace<ModelRequest>(trader, ModelRequest("dev", "test_cube"));
+	pRegistry->emplace<ModelRequest>(trader, ModelRequest("game", "cat"));
 	pRegistry->emplace<Transform>(trader).position = glm::vec3(0, 0, 5);
 
 	traderComponent.saleOffers.emplace(wood, 1);
-	
+
 	auto blueprintItems = pRegistry->view<BlueprintItem>();
 	int i = 0;
 	for (auto&& [entity, blueprintItem] : blueprintItems.each()) {
@@ -267,7 +268,7 @@ void Game::init() {
 void Game::input(double deltaTime) {
 	m_pConsoleGui->update();
 
-	if (!m_pConsoleGui->isOpened()) { 
+	if (!m_pConsoleGui->isOpened()) {
 		m_pControlSystem->input(deltaTime);
 	}
 
@@ -311,7 +312,7 @@ void Game::update(double updateInterval) {
 
 	//	pRegistry->emplace<ModelRequest>(surfaceScene, "dev", "test_surface");
 	//}
-	
+
 	m_pPhysicsSystem->update();
 	m_pScriptSystem->update();
 	m_pNpcSystem->update();
@@ -361,4 +362,3 @@ void Game::render() {
 }
 
 void Game::cleanUp() {}
-

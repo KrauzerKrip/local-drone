@@ -8,10 +8,10 @@
 
 
 GuiDependenciesFabricGl::GuiDependenciesFabricGl(IConsole* pConsole, ShaderLoaderGl* pShaderWorkGl, IInput* pInput,
-	TextureManager* pTextureManager, FramebufferController* pFramebufferController, IWindow* pWindow) { 
+	TextureManager* pTextureManager, FramebufferController* pFramebufferController, IWindow* pWindow, std::filesystem::path fontPath) {
 	BackgroundRenderGl* pBackgroundRender =
 		new BackgroundRenderGl(pConsole, pShaderWorkGl, pTextureManager, pFramebufferController, pWindow);
-	TextRenderGl* pTextRender = new TextRenderGl(pWindow, pConsole, pShaderWorkGl);
+	TextRenderGl* pTextRender = new TextRenderGl(pWindow, pConsole, pShaderWorkGl, fontPath);
 	WidgetZOffsetCalculatorGl* pWidgetZOffsetCalculator = new WidgetZOffsetCalculatorGl();
 	TextZOffsetCalculatorGl* pTextZOffsetCalculator = new TextZOffsetCalculatorGl();
 	InputController* pInputController = new InputController(pInput);

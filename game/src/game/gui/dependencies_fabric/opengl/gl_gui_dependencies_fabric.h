@@ -14,7 +14,7 @@
 class GuiDependenciesFabricGl : public GuiDependenciesFabric {
 public:
 	GuiDependenciesFabricGl(IConsole* pConsole, ShaderLoaderGl* pShaderWorkGl, IInput* pInput,
-		TextureManager* pTextureManager, FramebufferController* pFramebufferController, IWindow* pWindow);
+		TextureManager* pTextureManager, FramebufferController* pFramebufferController, IWindow* pWindow, std::filesystem::path fontPath);
 
 	GuiDependencies getDependencies() override;
 
