@@ -1,8 +1,7 @@
 local entity = {}
 local api = {}
 
-
-function init(ent, Api) 
+function init(ent, Api)
 	entity.ent = ent
 	api.scene = Api:getSceneApi()
 
@@ -16,15 +15,11 @@ function init(ent, Api)
 	scale:setXYZ(0.1, 0.1, 0.1)
 
 	entity.point_light = api.registry:addPointLight(ent)
-	entity.point_light:setColor(255, 255, 230);
+	entity.point_light:setColor(255, 255, 230)
 end
 
-function frame()
+function frame() end
 
-end
+function update() end
 
-function update() 
-end
-
-function use()
-end
+function use() end

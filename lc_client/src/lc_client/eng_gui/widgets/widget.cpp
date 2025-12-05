@@ -39,7 +39,7 @@ Widget::Widget() {
 
 void Widget::show() { m_isVisible = true; }
 
-void Widget::showWithChildren() { 
+void Widget::showWithChildren() {
 	show();
 
 	if (m_layout.get() != nullptr) {
@@ -110,13 +110,13 @@ LayoutPolicy Widget::getLayoutPolicy() { return m_layoutPolicy; }
 void Widget::setLayoutPolicy(LayoutPolicy policy) { m_layoutPolicy = policy; }
 
 void Widget::render() {
-	//std::cout << m_name << " " << m_rectangle.m_absolutePosition.x << " " << m_rectangle.m_absolutePosition.y << " "
-	//		  << m_rectangle.m_size.x << " " << m_rectangle.m_size.y << std::endl;
+	// std::cout << m_name << " " << m_rectangle.m_absolutePosition.x << " " << m_rectangle.m_absolutePosition.y << " "
+	// 		  << m_rectangle.m_size.x << " " << m_rectangle.m_size.y << std::endl;
 
 	if (m_isVisible && m_pBackground) {
 		m_pBackground->render(m_rectangle, m_layer);
 	}
-	
+
 	if (m_layout) {
 		for (Widget* pWidget : m_layout->getChildrenWidgets()) {
 			pWidget->render();

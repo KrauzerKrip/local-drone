@@ -26,8 +26,8 @@ void CharacterSystem::update(double updateInterval) {
 void CharacterSystem::createCharacters() {
 	entt::entity entity = m_pRegistry->create();
 	m_pRegistry->emplace<Properties>(entity, Properties("character_emmy", ""));
-	m_pRegistry->emplace<Transform>(entity, Transform(glm::vec3(0, 0, 2), glm::vec3(0, 0, 0), glm::vec3(1, 1, 1)));
-	m_pRegistry->emplace<ModelRequest>(entity, ModelRequest("dev", "test_cube_white"));
+	m_pRegistry->emplace<Transform>(entity, Transform(glm::vec3(0, 10, 2), glm::vec3(0, 0, 0), glm::vec3(1, 1, 1)));
+	m_pRegistry->emplace<ModelRequest>(entity, ModelRequest("dev", "test_cube"));
 	m_pRegistry->emplace<GameCharacter>(entity, GameCharacter("emmy"));
 	m_pRegistry->emplace<Npc>(entity, Npc(10));
 	m_pRegistry->emplace<Selectable>(entity, Selectable());

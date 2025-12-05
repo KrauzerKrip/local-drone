@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "glm/ext.hpp"
 
 #include "lc_client/eng_graphics/entt/components.h"
 #include "lc_client/eng_graphics/texture.h"
@@ -11,6 +12,7 @@
 #include "lc_client/eng_lighting/entt/components.h"
 #include "lc_client/eng_cubemaps/entt/components.h"
 #include "lc_client/eng_graphics/opengl/gl_shader_uniform.h"
+#include "lc_client/eng_scene/entt/components.h"
 
 
 MeshRenderGl::MeshRenderGl(entt::registry* pUtilRegistry) { m_pUtilRegistry = pUtilRegistry; }

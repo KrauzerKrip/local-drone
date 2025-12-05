@@ -1,8 +1,7 @@
 local entity = {}
 local api = {}
 
-
-function init(ent, Api) 
+function init(ent, Api)
 	entity.ent = ent
 	api.scene = Api:getSceneApi()
 	api.registry = api.scene:getRegistry()
@@ -13,11 +12,10 @@ end
 
 function frame() end
 
-function update() 
+function update()
 	transform = api.registry:getTransform(entity.ent)
 	position = transform:getPosition()
 	--position:setY(position:y() + 0.01)
 end
 
-function use()
-end
+function use() end

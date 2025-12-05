@@ -35,13 +35,13 @@
         <position x="4" y="0.1" z="-4"></position>
         <rotation x="0" y="0" z="0"></rotation>
         <scale x="0.1" y="0.1" z="0.1"></scale>
-      </transform>   
+      </transform>
       <model_data>
         <pack>dev</pack>
         <model>test_cube</model>
       </model_data>
       <script is_eternal="false">dev/entities/light_test/entity.lua</script>
-    </components> 
+    </components>
   </entity>
   <entity id="light_3" uuid="">
     <components>
@@ -60,9 +60,9 @@
   <!--<entity id="cube_2" uuid="">
     <components>
       <transform>
-        <position x="5" y="0" z="-0.5"></position>
+        <position x="0" y="0" z="0"></position>
         <rotation x="0" y="0" z="0"></rotation>
-        <scale x="1" y="1" z="1"></scale>
+        <scale x="100" y="100" z="100"></scale>
       </transform>
       <model_data>
         <pack>dev</pack>
@@ -79,7 +79,7 @@
       </transform>
       <model_data>
         <pack>dev</pack>
-        <model>test_surface</model>
+        <model>grass_surface</model>
       </model_data>
     </components>
   </entity>

@@ -6,7 +6,7 @@
 #include <future>
 #include <algorithm>
 #include <assert.h>
-
+#include "iostream"
 
 namespace eng {
 
@@ -23,7 +23,6 @@ namespace eng {
 
 	auto Resource::getFileResource(std::string path) const -> std::vector<unsigned char> {
 		std::ifstream binaryFile(m_resourceRootPath + path, std::ios::binary);
-
 		if (binaryFile.good()) {
 			/*Read Binary data using streambuffer iterators.*/
 			std::vector<unsigned char> buffer(

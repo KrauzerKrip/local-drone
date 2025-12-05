@@ -397,3 +397,4 @@ FodyWeavers.xsd
 
 /build
 /.direnv
+/result

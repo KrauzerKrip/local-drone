@@ -41,7 +41,10 @@
   "models": {
     "eng_model_not_found": "dev/models/eng_model_not_found/",
     "test_cube": "dev/models/test_cube/",
+    "brick_cube": "dev/models/brick_cube/",
     "test_cube_white": "dev/models/test_cube_white/",
-    "test_surface": "dev/models/test_surface/"
+    "test_surface": "dev/models/test_surface/",
+    "grass_surface": "dev/models/grass_surface/",
+    "camera": "dev/models/camera/"
   }
 }

@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.28)
 
 project(game)
 
-add_executable(game_exe "src/game/main.cpp" "src/game/main.h")
+include(GNUInstallDirs)
+
+add_executable(game_exe "src/game/main.cpp" "src/game/main.h" )
 add_library(game STATIC)
 target_sources(game PRIVATE "src/game/game.cpp" "src/game/game.h" "src/game/graphics.h" "src/game/graphics.cpp" "src/game/game_systems.h" "src/game/game_systems.cpp" "src/game/game_conpars_init.h" "src/game/game_conpars_init.cpp")
 
@@ -28,3 +30,7 @@ target_include_directories(game
 target_link_libraries(game_exe PRIVATE game)
 
 add_subdirectory("test")
+
+install(TARGETS game_exe
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)

@@ -229,7 +229,7 @@ void Game::init() {
 	pRegistry->emplace<BlueprintTrader>(trader);
 	Trader& traderComponent = pRegistry->emplace<Trader>(trader);
 	pRegistry->emplace<Properties>(trader);
-	pRegistry->emplace<ModelRequest>(trader, ModelRequest("game", "cat"));
+	pRegistry->emplace<ModelRequest>(trader, ModelRequest("dev", "test_cube_white"));
 	pRegistry->emplace<Transform>(trader).position = glm::vec3(0, 0, 5);
 
 	traderComponent.saleOffers.emplace(wood, 1);
@@ -248,7 +248,7 @@ void Game::init() {
 	pRegistry->emplace<ResourceDeposit>(brickDeposit, ResourceDeposit(brick, 100));
 	pRegistry->emplace<Transform>(brickDeposit).position = glm::vec3(0, 0, 10);
 	pRegistry->emplace<Properties>(brickDeposit);
-	pRegistry->emplace<ModelRequest>(brickDeposit, ModelRequest("dev", "test_cube_white"));
+	pRegistry->emplace<ModelRequest>(brickDeposit, ModelRequest("dev", "brick_cube"));
 
 	entt::entity tree = pRegistry->create();
 	pRegistry->emplace<Properties>(tree);
