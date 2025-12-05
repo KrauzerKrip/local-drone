@@ -1,7 +1,9 @@
 #include "model_loading.h"
 
+#include <assimp/postprocess.h>
 #include <iostream>
 
+#include "lc_client/eng_scene/entt/components.h"
 #include "lc_client/exceptions/io_exceptions.h"
 #include "lc_client/eng_graphics/entt/components.h"
 #include "lc_client/util/file_util.h"
@@ -19,7 +21,8 @@ namespace eng {
 
 	Model* ModelLoading::loadModel() {
 
-		std::cout << m_modelPath << std::endl;
+
+		//std::cout << m_modelPath << std::endl;
 
 		std::vector<unsigned char> buffer = m_pResource->getFileResource(m_modelPath);
 
@@ -27,7 +30,7 @@ namespace eng {
 
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFileFromMemory(
-			pBuffer, buffer.size(), aiProcess_Triangulate | aiProcess_FlipUVs, m_fileFormat.c_str());
+			pBuffer, buffer.size(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_ConvertToLeftHanded, m_fileFormat.c_str());
 
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
 			throw AssimpException(importer.GetErrorString());
@@ -92,7 +95,7 @@ namespace eng {
 				vertex.normal = glm::vec3(0.0f, 0.0f, 0.0f);
 			}
 
-			if (pMesh->mTextureCoords[0]) { // does the pMesh contain texture coordinates?
+			if (pMesh->mTextureCoords[0] != nullptr) { // does the pMesh contain texture coordinates?
 				glm::vec2 vec;
 				vec.x = pMesh->mTextureCoords[0][i].x;
 				vec.y = pMesh->mTextureCoords[0][i].y;
@@ -101,7 +104,7 @@ namespace eng {
 			else {
 				vertex.textureCoords = glm::vec2(0.0f, 0.0f);
 			}
-			
+
 			vertices.push_back(vertex);
 		}
 

@@ -1,7 +1,8 @@
 #include "gl_framebuffer_controller.h"
+#include <iostream>
 
 FramebufferController::FramebufferController(IWindow* pWindow) {
-	m_pWindow = pWindow; 
+	m_pWindow = pWindow;
 
 	pWindow->setResizeCallback([this](int width, int height) {
 		if (width != 0 && height != 0) {

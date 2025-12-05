@@ -57,7 +57,7 @@ void Framebuffer::bind() {
 	//	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 	//}
 
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fbo);
 }
 
 void Framebuffer::bindTexture() {

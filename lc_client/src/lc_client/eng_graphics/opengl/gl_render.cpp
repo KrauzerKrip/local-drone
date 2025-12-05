@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/ext.hpp>
 
 #include "lc_client/eng_graphics/entt/components.h"
 #include "lc_client/eng_graphics/opengl/gl_framebuffer.h"
@@ -63,16 +64,19 @@ void RenderGL::render() {
     assert(pFramebuffer != nullptr && "couldn't get framebuffer from controller");
     #endif
 
+    glBindTexture(GL_TEXTURE_2D, 0);
+
 	m_pFramebufferController->getFramebuffer()->bind();
 
+	glDepthMask(GL_TRUE);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	glStencilMask(0x00);
+	glEnable(GL_DEPTH_TEST);
 
 	float aspectRatio = (float)m_pWindow->getAspectRatio()[0] / (float)m_pWindow->getAspectRatio()[1];
 	glm::mat4 projection = glm::perspective(glm::radians(m_pGraphicsSettings->getFov()), aspectRatio, 0.1f, 1000.0f);
 	glm::mat4 view = m_pCamera->getViewMatrix(); // glm::mat4(1.0f);
-
 	m_pRenderMap->render(view, projection);
 
 	m_pOpaqueRender->render(projection, view);
@@ -85,18 +89,20 @@ void RenderGL::render() {
 	m_pTransparentRender->render(projection, view);
 	glDepthMask(true);
 	m_pPrimitiveRender->render(projection, view);
+	glDisable(GL_DEPTH_TEST);
+	glDepthMask(GL_FALSE);
 	m_pGuiPresenter->render();
 	m_pFramebufferController->getBlurFramebuffer()->bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
-	m_pFramebufferController->getFramebuffer()->bindTexture();
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // back to default
 	glDisable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glUseProgram(m_framebufferShader);
 	setUniform(m_framebufferShader, "screenTexture", TextureType::FRAMEBUFFER);
 
+	m_pFramebufferController->getFramebuffer()->bindTexture();
 	glBindVertexArray(m_framebufferVao);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
