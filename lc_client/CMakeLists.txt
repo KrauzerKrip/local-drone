@@ -23,6 +23,7 @@ find_path(LUABRIDGE_INCLUDE_DIRS "LuaBridge/List.h")
 find_package(Lua REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 find_package(Freetype REQUIRED)
+find_package(spdlog REQUIRED)
 
 target_link_libraries(lc_client PUBLIC glfw glad EnTT::EnTT)
 target_link_libraries(lc_client PUBLIC glm::glm)
@@ -34,7 +35,7 @@ target_include_directories(lc_client PRIVATE ${LUA_INCLUDE_DIR})
 target_link_libraries(lc_client PRIVATE ${LUA_LIBRARIES})
 target_link_libraries(lc_client PRIVATE imgui::imgui)
 target_link_libraries(lc_client PRIVATE Freetype::Freetype)
-
+target_link_libraries(lc_client PRIVATE spdlog::spdlog)
 #target_link_libraries(lc_client PRIVATE eng::rc)
 target_link_libraries(lc_client PRIVATE stb)
 

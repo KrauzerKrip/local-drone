@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.13)
 
 project(eng_procedures)
 
-target_sources(lc_client 
+target_sources(lc_client
     PRIVATE
         "conpar/conpar.h"
         "conpar/conpar.cpp"
@@ -27,4 +27,7 @@ target_sources(lc_client
         "logger/logger.h"
         "logger/logger_console.h"
         "logger/logger_console.cpp"
+
+        "log.h"
+        "log.cpp"
 )

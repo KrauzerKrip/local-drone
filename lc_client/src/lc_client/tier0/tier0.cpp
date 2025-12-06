@@ -8,9 +8,11 @@
 
 #include "console/console.h"
 #include "logger/logger_console.h"
+#include "log.h"
 
 
 Tier0::Tier0(std::filesystem::path resourceDir) {
+    lecore::Log::init();
 	m_pParameters = new Parameters();
 	initParameters(*m_pParameters);
 
@@ -24,6 +26,8 @@ Tier0::Tier0(std::filesystem::path resourceDir) {
 	m_pIConsole = m_pConsole;
 
 	m_pLogger = new LoggerConsole(m_pConsole);
+
+	lecore::Log::setConsole(m_pConsole);
 }
 
 Tier0::~Tier0() {
