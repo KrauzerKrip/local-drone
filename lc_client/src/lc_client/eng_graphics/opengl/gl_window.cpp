@@ -17,7 +17,7 @@
 #include "lc_client/eng_input/glfw_input.h"
 #include "lc_client/exceptions/glfw_exceptions.h"
 #include "lc_client/exceptions/glad_exceptions.h"
-
+#include "lc_client/tier0/log.h"
 
 WindowGL::WindowGL(std::string title, int width, int height, int* aspectRatio) {
 	m_title = title;
@@ -45,6 +45,8 @@ WindowGL::WindowGL(std::string title, int width, int height, int* aspectRatio) {
 	if (glfwInit() == GLFW_FALSE) {
 	    throw GlfwInitFailException();
 	}
+
+	LE_GAME_INFO("GLFW initialized");
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
@@ -101,10 +103,10 @@ void WindowGL::init() {
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW, 0, nullptr, GL_FALSE);
-		std::cout << "OpenGL debug context was created." << std::endl;
+		LE_CORE_DEBUG("OpenGL debug context was created");
 	}
 	else {
-		std::cout << "OpenGL Error: OpenGL debug context wasn`t created." << std::endl;
+		LE_CORE_ERROR("OpenGL Error: OpenGL debug context wasn`t created.");
 	}
 
 	glViewport(0, 0, m_width, m_height);
@@ -133,7 +135,7 @@ void WindowGL::init() {
 
 	ImGui::StyleColorsDark();
 
-	std::cout << "Window init" << std::endl;
+	LE_CORE_DEBUG("window initialized");
 
 	m_debug = true;
 

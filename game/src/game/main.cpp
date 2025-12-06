@@ -12,13 +12,13 @@
 #include "lc_client/eng_graphics/i_window.h"
 #include "lc_client/eng_graphics/opengl/gl_window.h"
 #include "lc_client/tier0/tier0.h"
-
+#include "lc_client/tier0/log.h"
 
 namespace fs = std::filesystem;
 
 
 void printException(const std::exception& e, int level = 0) {
-	std::cerr << std::string(level, ' ') << "Exception: " << e.what() << '\n';
+	LE_GAME_CRITICAL("{}Exception: {}", std::string(level, ' '), e.what());
 	try {
 		std::rethrow_if_nested(e);
 	}

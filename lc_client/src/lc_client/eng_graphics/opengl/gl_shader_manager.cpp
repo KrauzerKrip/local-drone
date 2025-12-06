@@ -6,10 +6,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "lc_client/util/directories.h"
-#include "lc_client/util/file_util.h"
 #include "lc_client/util/pack.h"
 #include "lc_client/tier1/game_info.h"
+#include "lc_client/tier0/log.h"
 
 
 ShaderManagerGl::ShaderManagerGl(eng::IResource* pResource) {
@@ -109,10 +108,10 @@ void ShaderManagerGl::compileShader(int shader, std::string path) {
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 
 	if (success) {
-		std::cout << "shaders: shader compiled: " << path << std::endl;
+		LE_CORE_DEBUG("shader compiled: {}", path);
 	}
 	else {
 		glGetShaderInfoLog(shader, 512, 0, infoLog);
-		std::cerr << "shaders: shader '" << path << "' compilation failure : \n " << infoLog << std::endl;
+		LE_CORE_ERROR("shader {} compilation failed: {}", path, infoLog);
 	}
 }

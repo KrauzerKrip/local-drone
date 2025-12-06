@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <memory>
 
+#include "lc_client/tier0/log.h"
 #include "lc_client/util/image.h"
 #include "lc_client/exceptions/io_exceptions.h"
 #include "lc_client/tier0/tier0.h"
@@ -19,7 +20,7 @@ Texture* TextureManager::getTexture(std::string path) {
 		return m_textureMap.at(path);
 	}
 	catch (std::out_of_range) {
-		std::cout << "Texture '" << path << "' not found in cache, will try to load." << std::endl;
+		LE_CORE_DEBUG("texture '{}' not found in cache, loading now...", path);
 		Texture* pTexture = nullptr;
 
 		try {
@@ -27,7 +28,7 @@ Texture* TextureManager::getTexture(std::string path) {
 			m_textureMap.emplace(path, pTexture);
 		}
 		catch (ResourceFileNotFoundException& exception) {
-			std::cerr << exception.what() << std::endl;
+			LE_CORE_WARN(exception.what());
 			Tier0::getIConsole()->warn(exception.what());
 			pTexture = m_textureMap.at("no_css?");
 		}
@@ -35,8 +36,7 @@ Texture* TextureManager::getTexture(std::string path) {
 			throw FileTooLargeException("Image is too large to load it: " + path);
 		}
 		catch (ImageLoadFailureException& exception) {
-			std::cerr << "Failed to load texture: " << path << ": " << exception.what() << std::endl;
-			Tier0::getIConsole()->warn("Failed to load texture: " + path + ": " + exception.what());
+			LE_CORE_WARN("failed to load texture '{}': {}", path, exception.what());
 			pTexture = m_textureMap.at("no_css?");
 		}
 
@@ -66,22 +66,20 @@ void TextureManager::reload() {
 			m_textureMap[path] = pTexture;
 		}
 		catch (ResourceFileNotFoundException& exception) {
-			std::cerr << exception.what() << std::endl;
-			Tier0::getIConsole()->warn(exception.what());
+			LE_CORE_WARN(exception.what());
 			pTexture = m_textureMap.at("no_css?");
 		}
 		catch (FileTooLargeException) {
-			std::cerr << ("Image is too large to load it: " + path) << std::endl;
+			LE_CORE_WARN("image is too large to load it: {}", path);
 		}
 		catch (ImageLoadFailureException& exception) {
-			std::cerr << "Failed to load texture: " << path << ": " << exception.what() << std::endl;
-			Tier0::getIConsole()->warn("Failed to load texture: " + path + ": " + exception.what());
+			LE_CORE_WARN("failed to load texture {}: {}", path, exception.what());
 			pTexture = m_textureMap.at("no_css?");
 		}
 
 		if (pTexture == nullptr) {
-			std::string str = "TextureManagerGL: pTexture is nullptt. Path given: " + path;
-			assert(str.c_str());
+		    LE_CORE_WARN("pTexture is nullptt. Path given {}", path);
+			assert(false && "pTexture is nullptt");
 		}
 	}
 }

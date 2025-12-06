@@ -4,6 +4,7 @@
 #include <LuaBridge/LuaBridge.h>
 
 #include "entt/components.h"
+#include "lc_client/tier0/log.h"
 
 using namespace luabridge;
 
@@ -18,7 +19,7 @@ void ScriptSystem::update() {
 	auto uninitedEntities = m_pRegistry->view<Script, Init, Properties>();
 
 	for (auto entity : uninitedEntities) {
-		
+
 		Script& script = uninitedEntities.get<Script>(entity);
 		lua_State* L = script.luaState;
 
@@ -33,7 +34,7 @@ void ScriptSystem::update() {
 			init(ent, &m_api);
 		}
 		catch (LuaException& exception) {
-			std::cerr << exception.what() << std::endl;
+			LE_CORE_ERROR(exception.what());
 		}
 
 		m_pRegistry->erase<Init>(entity);

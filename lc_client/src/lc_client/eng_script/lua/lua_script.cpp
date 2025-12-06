@@ -12,12 +12,13 @@
 #include "lc_client/eng_script/api/bindings/api_binding.h"
 #include "lc_client/exceptions/lua_exceptions.h"
 #include "lc_client/eng_script/api/bindings/registry_helper_binding.h"
+#include "lc_client/tier0/log.h"
 
 
 using namespace luabridge;
 
 
-ScriptLua::ScriptLua(const std::string source) { 
+ScriptLua::ScriptLua(const std::string source) {
 	m_pL = luaL_newstate();
 
 	luaL_openlibs(m_pL);
@@ -43,17 +44,17 @@ ScriptLua::ScriptLua(const std::string path, const eng::IResource* resource) {
 	if (luaL_loadstring(m_pL, source.c_str()) || lua_pcall(m_pL, 0, 0, 0)) {
 		std::string luaErrorInfo(lua_tostring(m_pL, -1));
 		std::replace(luaErrorInfo.begin(), luaErrorInfo.end(), '"', ' ');
-		std::cerr << luaErrorInfo << std::endl;
+		LE_CORE_ERROR(luaErrorInfo);
 		const std::string exceptionInfo = "================================================\nFile: '" + path + "': \n" + luaErrorInfo + "\n================================================";
 		throw LuaRunException(exceptionInfo);
 	}
 
-	std::cout << "Script loaded: " << path << std::endl;
+	LE_CORE_DEBUG("script loaded: {}", path);
 }
 
 lua_State* ScriptLua::getState() { return m_pL; }
 
-void ScriptLua::loadAPI() { 
+void ScriptLua::loadAPI() {
 	bindVec3(m_pL);
 	bindTransform(m_pL);
 	bindPointLight(m_pL);

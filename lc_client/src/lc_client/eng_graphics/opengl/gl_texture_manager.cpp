@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "lc_client/eng_graphics/opengl/gl_texture.h"
+#include "lc_client/tier0/log.h"
 
 
 TextureManagerGl::TextureManagerGl(eng::IResource* pResource) : TextureManager(pResource){}
@@ -16,7 +17,7 @@ Texture* TextureManagerGl::loadTexture(std::string path) {
 
 	Texture* pTexture = new TextureGL(pImage); // TODO
 
-	std::cout << "Texture '" << path << "' loaded." << std::endl;
-	
+	LE_CORE_DEBUG("texture {} loaded", path);
+
 	return pTexture;
 }

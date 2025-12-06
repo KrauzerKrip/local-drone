@@ -1,6 +1,7 @@
 #include "physics_loading_system.h"
 
 #include "lc_client/exceptions/physics_exception.h"
+#include "lc_client/tier0/log.h"
 
 
 PhysicsLoadingSystem::PhysicsLoadingSystem(PhysicsLoader* pPhysicsLoader, entt::registry* pRegistry, IConsole* pConsole) {
@@ -21,7 +22,7 @@ void PhysicsLoadingSystem::update() {
 				std::rethrow_if_nested(exception);
 			}
 			catch (const std::exception& nestedException) {
-				m_pConsole->warn(std::string(exception.what()) + "\nReason: " + nestedException.what());
+				LE_CORE_ERROR(std::string(exception.what()) + "\nReason: " + nestedException.what());
 			}
 		}
 		m_pRegistry->remove<PhysicsRequest>(entity);

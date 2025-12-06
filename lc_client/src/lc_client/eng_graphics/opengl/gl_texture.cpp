@@ -1,4 +1,5 @@
 #include "gl_texture.h"
+#include "lc_client/tier0/log.h"
 
 #include <glad/glad.h>
 #include <vector>
@@ -67,7 +68,7 @@ void TextureGL::unload() {
 
 void TextureGL::bind() {
 	if (m_textureType == TextureType::NONE) {
-		std::cerr << "Texture type is undefined" << std::endl;
+		LE_CORE_ERROR("texture type is undefined");
 		throw std::runtime_error("Texture type is undefined.");
 	}
 

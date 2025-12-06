@@ -9,10 +9,12 @@
 #include "lc_client/exceptions/io_exceptions.h"
 #include "lc_client/eng_model/model_loading.h"
 #include "lc_client/eng_graphics/entt/components.h"
+#include "lc_client/tier0/log.h"
+
 
 
 ModelManager::ModelManager(
-	TextureManager* pTextureManager, 
+	TextureManager* pTextureManager,
 	eng::IResource* pResource, entt::registry& pUtilRegistry, IConsole* pConsole) {
 	m_pTextureManager = pTextureManager;
 	m_pResource = pResource;
@@ -25,13 +27,13 @@ Model* ModelManager::getModel(const std::string modelPath, const std::string tex
 		return m_modelMap.at(modelPath);
 	}
 	catch (std::out_of_range) {
-		std::cout << "Model '" << modelPath << "' not found in cache, will try to load." << std::endl;
+		LE_CORE_DEBUG("model '{}' not found in cache, loading...", modelPath);
 		return loadModel(modelPath, texturesDirPath, materialType);
 	}
 }
 
 Model* ModelManager::loadModel(const std::string modelPath, const std::string texturesDirPath, const std::string materialType) {
-	Model* pModel = nullptr;  
+	Model* pModel = nullptr;
 
 	bool success = false;
 
@@ -43,7 +45,7 @@ Model* ModelManager::loadModel(const std::string modelPath, const std::string te
 		success = true;
 	}
 	catch (ResourceFileNotFoundException& exception) {
-		std::cerr << "Model resource not found: " << modelPath << ": " << exception.what() << std::endl;
+		LE_CORE_WARN("Resource not found for model {}: {}", modelPath, exception.what());
 
 		// "gmod vibe" here just to occur exception and load black-purple textures
 		eng::ModelLoading modelLoading(
@@ -51,7 +53,7 @@ Model* ModelManager::loadModel(const std::string modelPath, const std::string te
 		pModel = modelLoading.loadModel();
 	}
 	catch (AssimpException& exception) {
-		std::cerr << "Failed to load model: " << modelPath << ": " << exception.what() << std::endl;
+	    LE_CORE_WARN("Failed to load model {}: {}", modelPath, exception.what());
 
 		// "gmod vibe" here just to occur exception and load black-purple textures
 		eng::ModelLoading modelLoading(
@@ -68,12 +70,10 @@ Model* ModelManager::loadModel(const std::string modelPath, const std::string te
 	m_modelMap.emplace(modelPath, pModel);
 
 	if (success) {
-		std::cout << "Model '" << modelPath << "' loaded." << std::endl;
-		m_pConsole->devMessage("Model '" + modelPath + "' loaded.");
+	    LE_CORE_DEBUG("Model '{}' loaded", modelPath);
 	}
 	else {
-		std::cout << "Model '" << modelPath << "' wasn`t loaded successfully. Set default instead." << std::endl;
-		m_pConsole->warn("Model '" + modelPath + " wasn`t loaded successfully. Set default instead.");
+		LE_CORE_WARN("Model '" + modelPath + " wasn`t loaded successfully. Set default instead.");
 	}
 
 	pModel->materialDir = texturesDirPath;

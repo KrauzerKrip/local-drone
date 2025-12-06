@@ -5,7 +5,7 @@
 #include "lc_client/util/timer.h"
 #include "lc_client/exceptions/io_exceptions.h"
 #include "lc_client/eng_physics/entt/components.h"
-
+#include "lc_client/tier0/log.h"
 
 ModelSystem::ModelSystem(ModelManager* pModelManager, ModelParser* pModelParser, MeshLoader* pMeshWork,
 	entt::registry* pSceneRegistry, entt::registry* pUtilRegistry) {
@@ -27,7 +27,7 @@ void ModelSystem::update() {
 		catch (std::runtime_error& exception) {
 			Pack& pack = Pack::getPack("dev");
 			modelDirPath = Pack::Model(pack, "eng_model_not_found").getPath();
-			std::cerr << exception.what() << std::endl;
+			LE_CORE_WARN("can't find model {}:{}: {}", modelRequest.packName, modelRequest.modelName, exception.what());
 		}
 
 		Model* pModel = nullptr;
@@ -71,7 +71,7 @@ void ModelSystem::update() {
 			}
 		}
 		catch (std::runtime_error& exception) {
-			std::cerr << exception.what() << std::endl;
+			LE_CORE_WARN("model {}:{} loading failed: {}", modelRequest.packName, modelRequest.modelName, exception.what());
 		}
 
 		if (pModel == nullptr) {
@@ -93,7 +93,7 @@ void ModelSystem::update() {
 		m_pSceneRegistry->emplace<MeshLoadRequest>(entity);
 		m_pSceneRegistry->erase<ModelRequest>(entity);
 	}
-	 
+
 	auto meshUnloadRequestEntities = m_pSceneRegistry->view<MeshUnloadRequest, Model>();
 	for (auto&& [entity, model] : meshUnloadRequestEntities.each()) {
 		// TODO mesh unload

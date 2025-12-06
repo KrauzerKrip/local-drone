@@ -4,6 +4,7 @@
 
 #include <glad/glad.h>
 
+#include "lc_client/tier0/log.h"
 
 void ShaderLoaderGl::loadShaders(entt::registry* pRegistry, entt::entity entity, const std::string vertexShaderName,
 							   const std::string fragmentShaderName) {
@@ -19,15 +20,13 @@ unsigned int ShaderLoaderGl::createShaderProgram(std::string vertexShaderName, s
 		glAttachShader(shaderProgram, m_pShaderManager->getFragmentShader(fragmentShaderName));
 	}
 	catch (const std::out_of_range& exception) {
-		std::cerr << exception.what() << std::endl;
-		m_pConsole->warn(exception.what());
+		LE_CORE_WARN("can't find fragment shader '{}' for program", fragmentShaderName);
 	}
 	try {
 		glAttachShader(shaderProgram, m_pShaderManager->getVertexShader(vertexShaderName));
 	}
 	catch (const std::out_of_range& exception) {
-		std::cerr << exception.what() << std::endl;
-		m_pConsole->warn(exception.what());
+	    LE_CORE_WARN("can't find vertex shader '{}' for program", vertexShaderName);
 	}
 
 	glLinkProgram(shaderProgram);
@@ -37,13 +36,11 @@ unsigned int ShaderLoaderGl::createShaderProgram(std::string vertexShaderName, s
 	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
 
 	if (success == GL_TRUE) {
-		std::cout << "gl_shader_loader: shader program linked successfully: " << shaderProgram << std::endl;
+		LE_CORE_DEBUG("gl_shader_loader: shader program linked successfully: {}", shaderProgram);
 	}
 	else {
 		glGetProgramInfoLog(shaderProgram, 512, 0, infoLog);
-		std::cerr << "gl_shader_loader: shader program link failure: \n" << infoLog << std::endl;
-		std::string msgText = "gl_shader_loader: shader program link failure: " + (std::string) infoLog;
-		m_pConsole->warn(msgText);
+		LE_CORE_ERROR("gl_shader_loader: shader program link failure: \n{}", infoLog);
 	}
 
 	return shaderProgram;

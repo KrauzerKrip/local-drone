@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "lc_client/exceptions/io_exceptions.h"
+#include "lc_client/tier0/log.h"
 
 
 using json = nlohmann::json;
@@ -11,7 +12,7 @@ using json = nlohmann::json;
 void Pack::loadPack(const std::string name, std::string path, eng::IResource* pResource) {
 	Pack pack(name, path, pResource);
 	m_packs.emplace(name, std::forward<Pack>(pack));
-	std::cout << "Pack '" << name << "' with the path '" << path << "' has been loaded. " << std::endl;
+	LE_CORE_DEBUG("pack {} ({}) successfully loaded", name, path);
 }
 
 Pack& Pack::getPack(std::string name) {
@@ -49,8 +50,7 @@ Pack::Model::Model(Pack& parent, std::string name) : m_parent(parent) {
 		if (model.key() == name) {
 
 			if (isFound) {
-				std::cerr << "Pack::Model::Model: model with the name '" << name
-						  << "' occured more than one time in the pack '" << m_parent.m_name << "'." << std::endl;
+                LE_CORE_ERROR("model '{}' declared multiple times in the pack {}", name, m_parent.m_name);
 				break;
 			}
 
@@ -65,7 +65,7 @@ Pack::Model::Model(Pack& parent, std::string name) : m_parent(parent) {
 	}
 
 	if (isFound) {
-		std::cout << "Model '" << name << "' has been found in the pack '" << parent.m_name << "'." << std::endl;
+	    LE_CORE_DEBUG("model '{}' found in pack '{}'", name, parent.m_name);
 	}
 	else {
 		throw ModelNotFoundException("model '" + name + "' in the pack '" + parent.m_name + "' not found.");
@@ -75,7 +75,7 @@ Pack::Model::Model(Pack& parent, std::string name) : m_parent(parent) {
 Pack::Model::~Model() = default;
 std::string Pack::Model::getPath() { return m_modelPath; }
 
-Pack::Skybox::Skybox(Pack& parent, std::string name) : m_parent(parent){ 
+Pack::Skybox::Skybox(Pack& parent, std::string name) : m_parent(parent){
 	auto& skyboxes = parent.m_descriptor.at("skyboxes");
 
 	bool isFound = false;
@@ -85,8 +85,7 @@ Pack::Skybox::Skybox(Pack& parent, std::string name) : m_parent(parent){
 		if (skybox.key() == name) {
 
 			if (isFound) {
-				std::cerr << "Pack::Skybox::Skybox: skybox with the name '" << name
-						  << "' occured more than one time in the pack '" << m_parent.m_name << "'." << std::endl;
+			    LE_CORE_ERROR("skybox '{}' declared multiple times in the pack {}", name, m_parent.m_name);
 				break;
 			}
 
@@ -97,7 +96,7 @@ Pack::Skybox::Skybox(Pack& parent, std::string name) : m_parent(parent){
 	}
 
 	if (isFound) {
-		std::cout << "Skybox '" << name << "' has been found in the pack '" << parent.m_name << "'." << std::endl;
+	    LE_CORE_DEBUG("skybox '{}' found in pack '{}'", name, parent.m_name);
 	}
 	else {
 		throw ModelNotFoundException("Skybox '" + name + "' in the pack '" + parent.m_name + "' not found.");
@@ -161,7 +160,7 @@ Pack::VertexShader::VertexShader(Pack& parent, std::string name) {
  * @return all the *vertex shaders* in the pack in the format std::map<std::string, std::string> (shader name, shader
  * path).
  */
-std::map<std::string, std::string> Pack::VertexShader::getShaders(Pack& parent) { 
+std::map<std::string, std::string> Pack::VertexShader::getShaders(Pack& parent) {
 	auto& shaders = parent.m_descriptor.at("shaders");
 	auto& vertexShaders = shaders.at("vertex");
 

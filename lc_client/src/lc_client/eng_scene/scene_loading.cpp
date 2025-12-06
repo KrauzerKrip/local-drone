@@ -7,6 +7,7 @@
 #include "lc_client/eng_scene/entt/components.h"
 #include "lc_client/eng_model/entt/components.h"
 #include "lc_client/eng_graphics/entt/components.h"
+#include "lc_client/tier0/log.h"
 #include "lc_client/tier0/tier0.h"
 
 
@@ -44,9 +45,7 @@ void SceneLoading::loadScene(std::string path, entt::registry& sceneRegistry) {
 				std::string text = "SceneLoading: can`t add the component '" + (std::string)component.name() +
 								   "' to the entity '" + id + "': \n" + exception.what();
 
-				std::cerr << text << std::endl;
-
-				Tier0::getIConsole()->warn(text);
+				LE_CORE_WARN(text);
 			}
 		}
 		for (pugi::xml_node component : entityXml.child("pseudo_components").children()) {}

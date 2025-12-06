@@ -4,9 +4,11 @@
 
 #include "lc_client/eng_scene/component_creator.h"
 #include "components.h"
+#include "lc_client/tier0/log.h"
 
 
-MachineLoader::MachineLoader(eng::IResource* pResource, entt::registry* pRegistry) { 
+
+MachineLoader::MachineLoader(eng::IResource* pResource, entt::registry* pRegistry) {
 	m_pResource = pResource;
 	m_pRegistry = pRegistry;
 }
@@ -28,7 +30,7 @@ void MachineLoader::loadMachine(entt::entity entity, std::string typeString) {
 
 			std::string text = "MachineLoader: can`t add the component '" + (std::string)componentXml.name() + exception.what();
 
-			std::cerr << text << std::endl;
+			LE_GAME_ERROR(text);
 
 			// Tier0::getIConsole()->warn(text);
 		}

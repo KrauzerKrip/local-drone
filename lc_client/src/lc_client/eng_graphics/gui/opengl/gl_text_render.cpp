@@ -6,6 +6,7 @@
 #include<glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include "lc_client/eng_graphics/opengl/gl_shader_uniform.h"
+#include "lc_client/tier0/log.h"
 
 TextRenderGl::TextRenderGl(IWindow* pWindow, IConsole* pConsole, ShaderLoaderGl* pShaderLoader, std::filesystem::path font) :
 TextRender(pConsole),
@@ -130,13 +131,11 @@ void TextRenderGl::reload() {
 
 	FT_Library ft;
 	if (FT_Init_FreeType(&ft)) {
-		m_pConsole->warn("ERROR::FREETYPE: Could not init FreeType Library");
-		std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+		LE_CORE_ERROR("ERROR::FREETYPE: Could not init FreeType Library");
 	}
 	FT_Face face;
 	if (FT_New_Face(ft, m_fontPath.c_str(), 0, &face)) {
-		m_pConsole->warn("ERROR::FREETYPE: Failed to load font");
-		std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
+		LE_CORE_ERROR("ERROR::FREETYPE: Failed to load font");
 	}
 
 	FT_Set_Pixel_Sizes(face, 0, 48);
@@ -146,7 +145,7 @@ void TextRenderGl::reload() {
 	for (unsigned char c = 0; c < 128; c++) {
 		// load character glyph
 		if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-			m_pConsole->warn("ERROR::FREETYTPE: Failed to load Glyph");
+			LE_CORE_ERROR("ERROR::FREETYTPE: Failed to load Glyph");
 			continue;
 		}
 		// generate texture
