@@ -21,8 +21,8 @@ namespace lecore {
 		//logSinks.emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>("Hazel.log", true));
 		logSinks.emplace_back(m_consoleSink);
 
-		logSinks[0]->set_pattern("%^[%T] %n: %v%$");
-		//logSinks[1]->set_pattern("[%T] [%l] %n: %v");
+		logSinks[0]->set_pattern("%^[%T.%e] %n (%s): %v%$");
+		logSinks[1]->set_pattern("%^[%T.%e] %n (%s): %v%$");
 
 		m_coreLogger = std::make_shared<spdlog::logger>("CORE", begin(logSinks), end(logSinks));
 		spdlog::register_logger(m_coreLogger);
