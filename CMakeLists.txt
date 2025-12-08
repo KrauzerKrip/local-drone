@@ -1,25 +1,39 @@
-﻿# CMakeList.txt : CMake project for industry, include source and define
-# project specific logic here.
+﻿# project specific logic here.
 #
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 3.28)
 set(CMAKE_CXX_STANDARD 20)
 
 project("industry")
 
-file(GLOB SOURCES "lc_client/src/*.cpp")
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_library(lc_client ${SOURCES})
-#add_library(lc_client::lc_client ALIAS lc_client)
+add_library(lc_client)
+add_library(stb INTERFACE)
 
-target_include_directories(lc_client
-    PUBLIC
-        $<INSTALL_INTERFACE:lc_client/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lc_client/include>
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/src
+add_subdirectory("res")
+add_subdirectory("lc_client")
+add_subdirectory("libs")
+
+add_subdirectory("game")
+
+set(CMAKE_CXX_SCAN_FOR_MODULES true)
+
+target_include_directories(game PRIVATE lc_client)
+target_link_libraries(game lc_client)
+
+target_compile_options(lc_client PRIVATE
+    $<$<CONFIG:Debug>:-g>
+    $<$<CONFIG:Debug>:-O0>
+)
+target_compile_options(game PRIVATE
+    $<$<CONFIG:Debug>:-g>
+    $<$<CONFIG:Debug>:-O0>
+)
+target_compile_options(game_exe PRIVATE
+    $<$<CONFIG:Debug>:-g>
+    $<$<CONFIG:Debug>:-O0>
 )
 
-add_executable(industry game/main.cpp game/main.h)
-target_link_libraries(industry lc_client)
-
-# TODO: Add tests and install targets if needed.
+target_compile_definitions(lc_client PRIVATE
+    $<$<CONFIG:Debug>:LE_DEBUG>
+)

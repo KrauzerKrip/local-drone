@@ -1,0 +1,352 @@
+#include "gl_window.h"
+
+#include <GLFW/glfw3.h>
+#include <iostream>
+#include <cmath>
+#include <string>
+#include <format>
+
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+
+
+#include "lc_client/eng_graphics/opengl/gl_window.h"
+#include "lc_client/tier0/console/i_console_input.h"
+
+#include "lc_client/eng_input/glfw_input.h"
+#include "lc_client/exceptions/glfw_exceptions.h"
+#include "lc_client/exceptions/glad_exceptions.h"
+#include "lc_client/tier0/log.h"
+
+WindowGL::WindowGL(std::string title, int width, int height, int* aspectRatio) {
+	m_title = title;
+	m_width = width;
+	m_height = height;
+	m_pAspectRatio = aspectRatio;
+	m_targetFps = 0;
+
+	m_windowMode = WindowMode::WINDOWED;
+	m_cursorMode = CursorMode::CURSOR_DISABLED;
+
+	m_shouldWindowResize = false;
+	m_shouldChangeWindowMode = false;
+
+	m_resizeCallback = [](int width, int height) {};
+
+	m_pInput = new InputGlfw();
+
+	m_windowedDecorationsHeight = 23;
+
+	m_debug = false;
+
+	glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
+
+	if (glfwInit() == GLFW_FALSE) {
+	    throw GlfwInitFailException();
+	}
+
+	LE_GAME_INFO("GLFW initialized");
+
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_RESIZABLE, true);
+	glfwWindowHint(GLFW_DECORATED, true);
+	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+	glfwWindowHint(GLFW_SAMPLES, 8);
+
+	#ifdef LE_VM
+	    glfwDefaultWindowHints();
+	#endif
+	m_vSync = true;
+}
+
+WindowGL::~WindowGL() {
+	delete m_pInput;
+	delete[] m_pAspectRatio;
+};
+
+void WindowGL::init() {
+	if (m_debug) {
+		int i = 0;
+	}
+
+	m_debug = true;
+
+	if (m_windowMode == WindowMode::FULLSCREEN) {
+		m_pGlfwWindow = glfwCreateWindow(m_width, m_height, m_title.c_str(), glfwGetPrimaryMonitor(), NULL);
+	}
+	else if (m_windowMode == WindowMode::WINDOWED) {
+		m_pGlfwWindow = glfwCreateWindow(m_width, m_height, m_title.c_str(), NULL, NULL);
+	}
+
+	if (m_pGlfwWindow == nullptr) {
+	    const char* description;
+	    const int code = glfwGetError(&description);
+		const std::string message = std::format("code={}: {}", code, description);
+		throw GlfwWindowFailException(message);
+	}
+
+	glfwMakeContextCurrent(m_pGlfwWindow);
+
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+		throw GladInitFailException();
+	}
+
+	GLint flags;
+	glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+	if (flags & GL_CONTEXT_FLAG_DEBUG_BIT) {
+		glEnable(GL_DEBUG_OUTPUT);
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+		glDebugMessageCallback(messageCallback, nullptr);
+		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
+		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW, 0, nullptr, GL_FALSE);
+		LE_CORE_DEBUG("OpenGL debug context was created");
+	}
+	else {
+		LE_CORE_ERROR("OpenGL Error: OpenGL debug context wasn`t created.");
+	}
+
+	glViewport(0, 0, m_width, m_height);
+	// glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	glClearColor(117.0f / 255, 187.0f / 255, 253.0f / 255, 1.0f);
+	// glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+
+	if (m_vSync) {
+		glfwSwapInterval(1);
+	}
+	else {
+		glfwSwapInterval(0);
+	}
+
+	glfwSetWindowUserPointer(m_pGlfwWindow, this);
+	glfwSetFramebufferSizeCallback(m_pGlfwWindow, framebufferSizeCallback);
+	glfwSetKeyCallback(m_pGlfwWindow, keyCallback);
+	glfwSetMouseButtonCallback(m_pGlfwWindow, mouseButtonCallback);
+	glfwSetCursorPosCallback(m_pGlfwWindow, mouseCallback);
+	glfwSetScrollCallback(m_pGlfwWindow, mouseWheelCallback);
+
+	ImGui_ImplGlfw_InitForOpenGL(m_pGlfwWindow, true);
+	ImGui_ImplOpenGL3_Init("#version 460");
+
+	glfwSetWindowAspectRatio(m_pGlfwWindow, m_pAspectRatio[0], m_pAspectRatio[1]);
+
+	ImGui::StyleColorsDark();
+
+	LE_CORE_DEBUG("window initialized");
+
+	m_debug = true;
+
+	glfwMaximizeWindow(m_pGlfwWindow);
+
+	m_creationCallback();
+}
+
+void WindowGL::input() {
+}
+
+void WindowGL::frame() {
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+	glfwSwapBuffers(m_pGlfwWindow);
+	glfwPollEvents();
+}
+
+void WindowGL::startFrame() {
+	if (m_shouldWindowResize) {
+		this->resize();
+		m_shouldWindowResize = false;
+	}
+
+	ImGui_ImplGlfw_NewFrame();
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui::NewFrame();
+}
+
+bool WindowGL::windowShouldClose() {
+	return glfwWindowShouldClose(m_pGlfwWindow);
+}
+
+void WindowGL::terminate() {
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+
+	glfwDestroyWindow(m_pGlfwWindow);
+	glfwTerminate();
+}
+
+InputGlfw* WindowGL::getInput() {
+	return m_pInput;
+}
+
+void WindowGL::setCursorMode(CursorMode mode) {
+	m_cursorMode = mode;
+	if (mode == CursorMode::CURSOR_DISABLED) {
+		glfwSetInputMode(m_pGlfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	}
+	else if(mode == CursorMode::CURSOR_ENABLED) {
+		glfwSetInputMode(m_pGlfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
+}
+
+CursorMode WindowGL::getCursorMode() { return m_cursorMode; }
+
+void WindowGL::setResizeCallback(std::function<void(int, int)> callback) { m_resizeCallback = callback; }
+
+void WindowGL::setCreationCallback(std::function<void()> callback) { m_creationCallback = callback; }
+
+GLFWwindow* WindowGL::getGlfwWindow() {
+	return m_pGlfwWindow;
+}
+
+std::function<void(int, int)>& WindowGL::getResizeCallback() { return m_resizeCallback; }
+
+std::array<int, 2> WindowGL::getSize() {
+	std::array<int, 2> size;
+	size[0] = m_width;
+	size[1] = m_height;
+
+	return size;
+}
+
+void WindowGL::setSize(int width, int height) {
+	m_width = width;
+	m_height = height;
+
+	m_shouldWindowResize = true;
+}
+
+int* WindowGL::getAspectRatio() {
+	return m_pAspectRatio;
+}
+
+void WindowGL::setTargetFps(unsigned int fps) {
+	m_targetFps = fps;
+}
+
+void WindowGL::setVSync(bool vSync) {
+	m_vSync = vSync;
+}
+
+void WindowGL::keyCallback(GLFWwindow* pGlfwWindow, int key, int scancode, int action, int mods) {
+	WindowGL* pWindow = static_cast<WindowGL*>(glfwGetWindowUserPointer(pGlfwWindow));
+	pWindow->getInput()->invokeKeyCallbacks(key, action);
+}
+
+void WindowGL::mouseButtonCallback(GLFWwindow* pGlfwWindow, int button, int action, int mods) {
+	WindowGL* pWindow = static_cast<WindowGL*>(glfwGetWindowUserPointer(pGlfwWindow));
+	pWindow->getInput()->invokeKeyCallbacks(button, action);
+}
+
+void WindowGL::mouseCallback(GLFWwindow* pGlfwWindow, double x, double y) {
+	WindowGL* pWindow = (WindowGL*)glfwGetWindowUserPointer(pGlfwWindow);
+
+	//float offsetX = 1920.0f / pWindow->m_width;
+	//float offsetY = 1080.0f / pWindow->m_height;
+	glm::vec2 relativePosition(x, y);
+	if (pWindow->m_windowMode == WindowMode::WINDOWED) {
+		relativePosition.y += pWindow->m_windowedDecorationsHeight;
+	}
+
+	pWindow->getInput()->invokeMouseCallbacks(relativePosition);
+}
+
+void WindowGL::mouseWheelCallback(GLFWwindow* pGlfwWindow, double xoffset, double yoffset) {
+	WindowGL* pWindow = (WindowGL*)glfwGetWindowUserPointer(pGlfwWindow);
+	pWindow->getInput()->invokeMouseWheelCallbacks(glm::vec2((float) xoffset, (float) yoffset));
+}
+
+static void framebufferSizeCallback(GLFWwindow* pWindow, int width, int height) {
+	WindowGL* pWindowGL = (WindowGL*)glfwGetWindowUserPointer(pWindow);
+
+	bool debug = pWindowGL->m_debug;
+
+	const int widthWindow = width;
+	//const int aspectRatio = pWindowGL->getAspectRatio()[0] / pWindowGL->getAspectRatio()[1];
+	const int heightWindow = height; // std::round(width / aspectRatio);
+	pWindowGL->setSize(widthWindow, heightWindow);
+
+	//pWindowGL->update();
+}
+
+void GLAPIENTRY messageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+	const GLchar* message, const void* userParam) {
+	// ignore non-significant error/warning codes
+	if(id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
+
+    std::cout << "---------------" << std::endl;
+    std::cout << "Debug message (" << id << "): " <<  message << std::endl;
+
+    switch (source)
+    {
+        case GL_DEBUG_SOURCE_API:             std::cout << "Source: API"; break;
+        case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   std::cout << "Source: Window System"; break;
+        case GL_DEBUG_SOURCE_SHADER_COMPILER: std::cout << "Source: Shader Compiler"; break;
+        case GL_DEBUG_SOURCE_THIRD_PARTY:     std::cout << "Source: Third Party"; break;
+        case GL_DEBUG_SOURCE_APPLICATION:     std::cout << "Source: Application"; break;
+        case GL_DEBUG_SOURCE_OTHER:           std::cout << "Source: Other"; break;
+    } std::cout << std::endl;
+
+    switch (type)
+    {
+        case GL_DEBUG_TYPE_ERROR:               std::cout << "Type: Error"; break;
+        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: std::cout << "Type: Deprecated Behaviour"; break;
+        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  std::cout << "Type: Undefined Behaviour"; break;
+        case GL_DEBUG_TYPE_PORTABILITY:         std::cout << "Type: Portability"; break;
+        case GL_DEBUG_TYPE_PERFORMANCE:         std::cout << "Type: Performance"; break;
+        case GL_DEBUG_TYPE_MARKER:              std::cout << "Type: Marker"; break;
+        case GL_DEBUG_TYPE_PUSH_GROUP:          std::cout << "Type: Push Group"; break;
+        case GL_DEBUG_TYPE_POP_GROUP:           std::cout << "Type: Pop Group"; break;
+        case GL_DEBUG_TYPE_OTHER:               std::cout << "Type: Other"; break;
+    } std::cout << std::endl;
+
+    switch (severity)
+    {
+        case GL_DEBUG_SEVERITY_HIGH:         std::cout << "Severity: high"; break;
+        case GL_DEBUG_SEVERITY_MEDIUM:       std::cout << "Severity: medium"; break;
+        case GL_DEBUG_SEVERITY_LOW:          std::cout << "Severity: low"; break;
+        case GL_DEBUG_SEVERITY_NOTIFICATION: std::cout << "Severity: notification"; break;
+    } std::cout << std::endl;
+    std::cout << std::endl;
+	// fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+	// 	(type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity, message);
+}
+
+void WindowGL::resize() {
+	glfwSetWindowSize(m_pGlfwWindow, m_width, m_height);
+	glViewport(0, 0, m_width, m_height);
+	m_resizeCallback(m_width, m_height);
+}
+
+void WindowGL::setWindowMode(WindowMode mode) {
+	m_windowMode = mode;
+
+	if (m_windowMode == WindowMode::WINDOWED) {
+		glfwSetWindowMonitor(m_pGlfwWindow, nullptr, 0, 0, m_width, m_height, m_targetFps);
+		glfwMaximizeWindow(m_pGlfwWindow);
+		if (m_vSync) {
+			glfwSwapInterval(1);
+		}
+		else {
+			glfwSwapInterval(0);
+		}
+	}
+	else if (m_windowMode == WindowMode::FULLSCREEN) {
+		glfwSetWindowMonitor(m_pGlfwWindow, glfwGetPrimaryMonitor(), 0, 0, m_width, m_height, m_targetFps);
+		if (m_vSync) {
+			glfwSwapInterval(1);
+		}
+		else {
+			glfwSwapInterval(0);
+		}
+	}
+}
+
+WindowMode WindowGL::getWindowMode() { return m_windowMode; }
+
+void WindowGL::changeWindowMode() {
+}

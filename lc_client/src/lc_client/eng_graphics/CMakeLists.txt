@@ -1,0 +1,85 @@
+cmake_minimum_required (VERSION 3.13)
+
+project(eng_graphics)
+
+target_sources(lc_client 
+    PRIVATE
+        "i_window.h"
+        "i_render.h"
+        "texture.h"
+        "mesh_loader.h"
+        "shader_loader.h"
+        "skybox_render.h"
+        "skybox_render.cpp"
+        
+        "shader_system.h"
+        "shader_system.cpp"
+        "../eng_model/material_system.h"
+        "../eng_model/material_system.cpp"
+        "graphics_settings.h"
+        "graphics_settings.cpp"
+
+        "shader_manager.h"
+        "texture_manager.h"
+        "texture_manager.cpp"
+
+        "opengl/gl_render.cpp"
+        "opengl/gl_render.h"
+        "opengl/gl_window.cpp"
+        "opengl/gl_window.h"
+        "opengl/gl_texture.h"
+        "opengl/gl_texture.cpp"
+        "opengl/gl_mesh_loader.h"
+        "opengl/gl_mesh_loader.cpp"
+        "opengl/gl_shader_loader.h"
+        "opengl/gl_shader_loader.cpp"
+        "opengl/gl_shader_uniform.h"
+        "opengl/gl_framebuffer.h"
+        "opengl/gl_framebuffer.cpp"
+        "opengl/gl_skybox_render.h"
+        "opengl/gl_skybox_render.cpp"
+        "opengl/gl_cubemap.h"
+        "opengl/gl_cubemap.cpp"
+        "opengl/gl_framebuffer_controller.h"
+        "opengl/gl_framebuffer_controller.cpp"
+        "opengl/gl_shader_manager.h"
+        "opengl/gl_shader_manager.cpp"
+        "opengl/gl_texture_manager.h"
+        "opengl/gl_texture_manager.cpp"
+        "opengl/renders/gl_render_map.h"
+        "opengl/renders/gl_render_map.cpp"
+        "opengl/renders/gl_lighting.h"
+        "opengl/renders/gl_lighting.cpp"
+        "opengl/renders/gl_primitive_render.h"
+        "opengl/renders/gl_primitive_render.cpp"
+        "opengl/renders/gl_transparent_render.h"
+        "opengl/renders/gl_transparent_render.cpp"
+        "opengl/renders/gl_mesh_render.h"
+        "opengl/renders/gl_mesh_render.cpp"
+        "opengl/renders/gl_outline_render.h"
+        "opengl/renders/gl_outline_render.cpp"
+        "opengl/renders/gl_opaque_render.h"
+        "opengl/renders/gl_opaque_render.cpp"
+
+
+        "gui/text_render.h"
+        "gui/background_render.h"
+        "gui/zoffset_calculator.h"
+        "gui/opengl/gl_text_render.h"
+        "gui/opengl/gl_text_render.cpp"
+        "gui/opengl/gl_background_render.h"
+        "gui/opengl/gl_background_render.cpp"
+        "gui/opengl/gl_widget_zoffset_calculator.h"
+        "gui/opengl/gl_widget_zoffset_calculator.cpp"
+        "gui/opengl/gl_text_zoffset_calculator.h"
+        "gui/opengl/gl_text_zoffset_calculator.cpp"
+        "gui/opengl/gl_blur_framebuffer.h"
+        "gui/opengl/gl_blur_framebuffer.cpp"
+
+
+        "entt/components.h"
+
+        "camera/camera.h"
+        "camera/camera.cpp"
+
+ "opengl/gl_shader_uniform.cpp")

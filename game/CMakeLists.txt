@@ -1,8 +1,36 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.28)
 
 project(game)
 
-add_executable(game "main.cpp" "main.h")
+include(GNUInstallDirs)
 
-target_include_directories(game PRIVATE lc_client)
-target_link_libraries(game lc_client)
+add_executable(game_exe "src/game/main.cpp" "src/game/main.h" )
+add_library(game STATIC)
+target_sources(game PRIVATE "src/game/game.cpp" "src/game/game.h" "src/game/graphics.h" "src/game/graphics.cpp" "src/game/game_systems.h" "src/game/game_systems.cpp" "src/game/game_conpars_init.h" "src/game/game_conpars_init.cpp")
+
+add_subdirectory("src/game/gui")
+add_subdirectory("src/game/loader_fabric")
+add_subdirectory("src/game/camera")
+add_subdirectory("src/game/control")
+add_subdirectory("src/game/character")
+add_subdirectory("src/game/machine")
+add_subdirectory("src/game/item")
+add_subdirectory("src/game/agriculture")
+add_subdirectory("src/game/inventory")
+add_subdirectory("src/game/economy")
+add_subdirectory("src/game/resource")
+add_subdirectory("src/game/util")
+
+target_include_directories(game
+    PUBLIC
+        $<INSTALL_INTERFACE:/src>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+)
+
+target_link_libraries(game_exe PRIVATE game)
+
+add_subdirectory("test")
+
+install(TARGETS game_exe
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)

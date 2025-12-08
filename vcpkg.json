@@ -1,0 +1,18 @@
+{
+  "dependencies": [
+    "assimp",
+    "entt",
+    "freetype",
+    "glad",
+    {
+      "name": "glfw3",
+      "features": [
+        "wayland"
+      ]
+    },
+    "glm",
+    "imgui",
+    "nlohmann-json",
+    "pugixml"
+  ]
+}

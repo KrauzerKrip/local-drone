@@ -394,3 +394,7 @@ FodyWeavers.xsd
 *.exe
 *.out
 *.app
+
+/build
+/.direnv
+/result

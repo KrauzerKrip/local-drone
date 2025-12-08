@@ -1,0 +1,49 @@
+#include "tier0.h"
+#include "tier0.h"
+
+#include <imgui.h>
+
+#include "conpar/conpars_init.h"
+#include "conpar/parameters.h"
+
+#include "console/console.h"
+#include "logger/logger_console.h"
+#include "log.h"
+
+
+Tier0::Tier0(std::filesystem::path resourceDir) {
+    lecore::Log::init();
+	m_pParameters = new Parameters();
+	initParameters(*m_pParameters);
+
+	m_pConsole = new Console(m_pParameters);
+
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+
+	m_pImGuiFonts = new ImGuiFonts(resourceDir);
+
+	m_pIConsole = m_pConsole;
+
+	m_pLogger = new LoggerConsole(m_pConsole);
+
+	lecore::Log::setConsole(m_pConsole);
+}
+
+Tier0::~Tier0() {
+	delete m_pParameters;
+	delete m_pConsole;
+}
+
+Parameters* Tier0::getParameters() { return m_pParameters; }
+
+Console* Tier0::getConsole() { return m_pConsole; }
+
+Logger* Tier0::getLogger() { return m_pLogger; }
+
+ImGuiFonts* Tier0::getImGuiFonts() { return m_pImGuiFonts; }
+
+IConsole* Tier0::getIConsole() { return m_pIConsole; }
+
+
+IConsole* Tier0::m_pIConsole = nullptr;

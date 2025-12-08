@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<machine>
+  <components>x
+    <transform>
+      <position x="0" y="8" z="0"></position>
+      <rotation x="0" y="0" z="0"></rotation>
+      <scale x="3" y="3" z="3"></scale>
+    </transform>
+    <model_data>      
+      <pack>game</pack>
+      <model>tree</model>
+    </model_data>
+    <connections>
+      <latex_out>
+        <position x="0" y="0" z="0"></position>
+        <rotation x="0" y="0" z="0"></rotation>
+      </latex_out>
+    </connections>
+  </components>    
+</machine>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<machine>
+  <components>
+    <transform>
+      <position x="0" y="2" z="0"></position>
+      <rotation x="0" y="180" z="0"></rotation>
+      <scale x="0.5" y="0.5" z="0.5"></scale>
+    </transform>
+    <model_data>
+      <pack>game</pack>
+      <model>heater</model>
+    </model_data>
+    <connections>
+      <heat_out>
+        <position x="2.5" y="0" z="-2"></position>
+        <rotation x="0" y="0" z="0"></rotation> 
+      </heat_out>
+    </connections>
+  </components>    
+</machine>

@@ -1,0 +1,84 @@
+#include "gl_texture.h"
+#include "lc_client/tier0/log.h"
+
+#include <glad/glad.h>
+#include <vector>
+#include <stdexcept>
+#include <iostream>
+
+//#define DEBUG
+
+
+TextureGL::TextureGL(eng::Image* pImage) {
+	m_image = std::unique_ptr<eng::Image>(pImage);
+
+	glGenTextures(1, &m_textureGl);
+
+#ifdef DEBUG
+	if (m_textureType == TextureType::COLOR) {
+		std::cout << "COLOR: " << GL_TEXTURE0 + m_textureType << m_textureType << std::endl;
+	}
+
+	if (m_textureType == TextureType::NORMAL) {
+		std::cout << "NORMAL: " << GL_TEXTURE0 + m_textureType << m_textureType << std::endl;
+	}
+
+	if (m_textureType == TextureType::AO) {
+		std::cout << "AO: " << GL_TEXTURE0 + m_textureType << m_textureType << std::endl;
+	}
+
+	if (m_textureType == TextureType::METALLIC) {
+		std::cout << "METALLIC: " << GL_TEXTURE0 + m_textureType << m_textureType << std::endl;
+	}
+
+	if (m_textureType == TextureType::DIFFUSE) {
+		std::cout << "DIFFUSE: " << GL_TEXTURE0 + m_textureType << m_textureType << std::endl;
+	}
+
+	if (m_textureType == TextureType::GLOSSINESS) {
+		std::cout << "GLOSSINESS: " << GL_TEXTURE0 + m_textureType << m_textureType << std::endl;
+	}
+
+	if (m_textureType == TextureType::SPECULAR) {
+		std::cout << "SPECULAR: " << GL_TEXTURE0 + m_textureType << m_textureType << std::endl;
+	}
+
+#endif
+
+	glBindTexture(GL_TEXTURE_2D, m_textureGl);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_FALSE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_image->getWidth(), m_image->getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+		m_image->getData());
+	glGenerateMipmap(GL_TEXTURE_2D);
+}
+
+void TextureGL::load() {
+
+
+}
+
+void TextureGL::unload() {
+}
+
+void TextureGL::bind() {
+	if (m_textureType == TextureType::NONE) {
+		LE_CORE_ERROR("texture type is undefined");
+		throw std::runtime_error("Texture type is undefined.");
+	}
+
+	glActiveTexture(GL_TEXTURE0 + m_textureType);
+	glBindTexture(GL_TEXTURE_2D, m_textureGl);
+}
+
+
+void TextureGL::setTextureType(TextureType textureType) {
+	m_textureType = textureType;
+}
+
+int TextureGL::getId() { return m_textureGl; }

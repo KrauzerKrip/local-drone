@@ -1,0 +1,50 @@
+{
+  "pack": "dev",
+
+  "shaders": {
+    "vertex": {
+      "base": "dev/shaders/vert/base.vert",
+      "framebuffer": "dev/shaders/vert/framebuffer.vert",
+      "skybox": "dev/shaders/vert/skybox.vert",
+      "water": "dev/shaders/vert/water.vert",
+      "gui_text": "dev/shaders/vert/gui_text.vert",
+      "gui_quad": "dev/shaders/vert/gui_quad.vert",
+      "quad_instancing": "dev/shaders/vert/quad_instancing.vert",
+      "primitive": "dev/shaders/vert/primitive.vert"
+    },
+    "fragment": {
+      "base": "dev/shaders/frag/base.frag",
+      "camera_model": "dev/shaders/frag/base.frag",
+      "lighting": "dev/shaders/frag/lighting.frag",
+      "framebuffer": "dev/shaders/frag/framebuffer.frag",
+      "skybox": "dev/shaders/frag/skybox.frag",
+      "water": "dev/shaders/frag/water.frag",
+      "gui_text": "dev/shaders/frag/gui_text.frag",
+      "gui_quad": "dev/shaders/frag/gui_quad.frag",
+      "gui_blur_quad": "dev/shaders/frag/gui_blur_quad.frag",
+      "primitive": "dev/shaders/frag/primitive.frag",
+      "gui_image_quad": "dev/shaders/frag/gui_image_quad.frag",
+      "base_material": "dev/shaders/frag/base_material.frag",
+      "primitive_alpha": "dev/shaders/frag/primitive_alpha.frag"
+    }
+  },
+
+  "skyboxes": {
+    "default": {
+      "path": "dev/skyboxes/default/"
+    },
+    "anime": {
+      "path": "dev/skyboxes/anime/"
+    }
+  },
+
+  "models": {
+    "eng_model_not_found": "dev/models/eng_model_not_found/",
+    "test_cube": "dev/models/test_cube/",
+    "brick_cube": "dev/models/brick_cube/",
+    "test_cube_white": "dev/models/test_cube_white/",
+    "test_surface": "dev/models/test_surface/",
+    "grass_surface": "dev/models/grass_surface/",
+    "camera": "dev/models/camera/"
+  }
+}
