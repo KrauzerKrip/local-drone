@@ -2,6 +2,7 @@
 
 #include "lc_client/eng_graphics/i_window.h"
 
+#include <glm/fwd.hpp>
 #include <unordered_map>
 #include <functional>
 #include <string>
@@ -23,14 +24,13 @@ static void GLAPIENTRY messageCallback(GLenum source, GLenum type, GLuint id, GL
 
 class WindowGL : public IWindow {
 public:
-
 	WindowGL(std::string, int width, int height, int* aspectRatio);
 	~WindowGL();
 
 	void init() override;
 	void input() override;
 	void frame() override;
-	void startFrame() override; 
+	void startFrame() override;
 	bool windowShouldClose() override;
 	void terminate() override;
 	InputGlfw* getInput();
@@ -63,11 +63,12 @@ private:
 	void resize();
 	void changeWindowMode();
 
-	std::function<void(int, int)> m_resizeCallback; 
+	std::function<void(int, int)> m_resizeCallback;
 	std::function<void()> m_creationCallback;
 
 	int m_width;
 	int m_height;
+	glm::vec2 m_pixelToScreenCoordRatio; // it's required to convert screen coordinates to pixels
 	std::string m_title;
 	int* m_pAspectRatio;
 	bool m_vSync;

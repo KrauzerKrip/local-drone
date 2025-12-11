@@ -9,7 +9,7 @@ InputGlfw::InputGlfw() {
 	m_keyMap.emplace(KeyCode::MOUSE_BUTTON_LEFT, GLFW_MOUSE_BUTTON_LEFT);
 	m_keyMap.emplace(KeyCode::MOUSE_BUTTON_RIGHT, GLFW_MOUSE_BUTTON_RIGHT);
 	m_keyMap.emplace(KeyCode::MOUSE_BUTTON_MIDDLE, GLFW_MOUSE_BUTTON_MIDDLE);
-	
+
 	m_keyMap.emplace(KeyCode::A, GLFW_KEY_A);
 	m_keyMap.emplace(KeyCode::B, GLFW_KEY_B);
 	m_keyMap.emplace(KeyCode::C, GLFW_KEY_C);
@@ -88,7 +88,7 @@ void InputGlfw::addMappedKeyCallback(KeyCode key, std::function<void()> callback
 	if (m_mappedKeyCallbacks.find(key) == m_mappedKeyCallbacks.end()) {
 		m_mappedKeyCallbacks.emplace(key, std::vector<std::function<void()>>());
 	}
-	
+
 	m_mappedKeyCallbacks.at(key).push_back(callback);
 }
 
@@ -98,7 +98,7 @@ void InputGlfw::addMouseWheelCallback(std::function<void(glm::vec2)> callback) {
 	m_mouseWheelCallbacks.push_back(callback);
 }
 
-void InputGlfw::invokeKeyCallbacks(int key, int action) { 
+void InputGlfw::invokeKeyCallbacks(int key, int action) {
 	KeyCode keyCode;
 
 	for (auto& [k, v] : m_keyMap) {
@@ -122,14 +122,14 @@ void InputGlfw::invokeKeyCallbacks(int key, int action) {
 		for (auto& [key, callbacks] : m_mappedKeyCallbacks) {
 			if (key == keyCode) {
 				for (auto& callback : callbacks)
-				callback();
+					callback();
 			}
 		}
 	}
 }
 
 void InputGlfw::invokeMouseCallbacks(glm::vec2 position) {
-	glm::vec2 pos = glm::vec2(position.x, (1080 - position.y));
+	glm::vec2 pos = glm::vec2(position.x, position.y);
 
 	m_mousePosition = pos;
 
