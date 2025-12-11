@@ -1,6 +1,7 @@
 #include "gl_window.h"
 
 #include <GLFW/glfw3.h>
+#include <glm/fwd.hpp>
 #include <iostream>
 #include <cmath>
 #include <string>
@@ -43,7 +44,7 @@ WindowGL::WindowGL(std::string title, int width, int height, int* aspectRatio) {
 	glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
 
 	if (glfwInit() == GLFW_FALSE) {
-	    throw GlfwInitFailException();
+		throw GlfwInitFailException();
 	}
 
 	LE_GAME_INFO("GLFW initialized");
@@ -56,9 +57,9 @@ WindowGL::WindowGL(std::string title, int width, int height, int* aspectRatio) {
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 	glfwWindowHint(GLFW_SAMPLES, 8);
 
-	#ifdef LE_VM
-	    glfwDefaultWindowHints();
-	#endif
+#ifdef LE_VM
+	glfwDefaultWindowHints();
+#endif
 	m_vSync = true;
 }
 
@@ -82,8 +83,8 @@ void WindowGL::init() {
 	}
 
 	if (m_pGlfwWindow == nullptr) {
-	    const char* description;
-	    const int code = glfwGetError(&description);
+		const char* description;
+		const int code = glfwGetError(&description);
 		const std::string message = std::format("code={}: {}", code, description);
 		throw GlfwWindowFailException(message);
 	}
@@ -144,8 +145,7 @@ void WindowGL::init() {
 	m_creationCallback();
 }
 
-void WindowGL::input() {
-}
+void WindowGL::input() {}
 
 void WindowGL::frame() {
 	ImGui::Render();
@@ -166,9 +166,7 @@ void WindowGL::startFrame() {
 	ImGui::NewFrame();
 }
 
-bool WindowGL::windowShouldClose() {
-	return glfwWindowShouldClose(m_pGlfwWindow);
-}
+bool WindowGL::windowShouldClose() { return glfwWindowShouldClose(m_pGlfwWindow); }
 
 void WindowGL::terminate() {
 	ImGui_ImplOpenGL3_Shutdown();
@@ -179,16 +177,14 @@ void WindowGL::terminate() {
 	glfwTerminate();
 }
 
-InputGlfw* WindowGL::getInput() {
-	return m_pInput;
-}
+InputGlfw* WindowGL::getInput() { return m_pInput; }
 
 void WindowGL::setCursorMode(CursorMode mode) {
 	m_cursorMode = mode;
 	if (mode == CursorMode::CURSOR_DISABLED) {
 		glfwSetInputMode(m_pGlfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	}
-	else if(mode == CursorMode::CURSOR_ENABLED) {
+	else if (mode == CursorMode::CURSOR_ENABLED) {
 		glfwSetInputMode(m_pGlfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
 }
@@ -199,9 +195,7 @@ void WindowGL::setResizeCallback(std::function<void(int, int)> callback) { m_res
 
 void WindowGL::setCreationCallback(std::function<void()> callback) { m_creationCallback = callback; }
 
-GLFWwindow* WindowGL::getGlfwWindow() {
-	return m_pGlfwWindow;
-}
+GLFWwindow* WindowGL::getGlfwWindow() { return m_pGlfwWindow; }
 
 std::function<void(int, int)>& WindowGL::getResizeCallback() { return m_resizeCallback; }
 
@@ -220,17 +214,11 @@ void WindowGL::setSize(int width, int height) {
 	m_shouldWindowResize = true;
 }
 
-int* WindowGL::getAspectRatio() {
-	return m_pAspectRatio;
-}
+int* WindowGL::getAspectRatio() { return m_pAspectRatio; }
 
-void WindowGL::setTargetFps(unsigned int fps) {
-	m_targetFps = fps;
-}
+void WindowGL::setTargetFps(unsigned int fps) { m_targetFps = fps; }
 
-void WindowGL::setVSync(bool vSync) {
-	m_vSync = vSync;
-}
+void WindowGL::setVSync(bool vSync) { m_vSync = vSync; }
 
 void WindowGL::keyCallback(GLFWwindow* pGlfwWindow, int key, int scancode, int action, int mods) {
 	WindowGL* pWindow = static_cast<WindowGL*>(glfwGetWindowUserPointer(pGlfwWindow));
@@ -245,11 +233,12 @@ void WindowGL::mouseButtonCallback(GLFWwindow* pGlfwWindow, int button, int acti
 void WindowGL::mouseCallback(GLFWwindow* pGlfwWindow, double x, double y) {
 	WindowGL* pWindow = (WindowGL*)glfwGetWindowUserPointer(pGlfwWindow);
 
-	//float offsetX = 1920.0f / pWindow->m_width;
-	//float offsetY = 1080.0f / pWindow->m_height;
-	glm::vec2 relativePosition(x, y);
+	// float offsetX = 1920.0f / pWindow->m_width;
+	// float offsetY = 1080.0f / pWindow->m_height;
+	glm::vec2 relativePosition(
+		pWindow->m_pixelToScreenCoordRatio.x * x, pWindow->m_pixelToScreenCoordRatio.y * (pWindow->m_height - y));
 	if (pWindow->m_windowMode == WindowMode::WINDOWED) {
-		relativePosition.y += pWindow->m_windowedDecorationsHeight;
+		// relativePosition.y += pWindow->m_windowedDecorationsHeight; // mb enable on windows
 	}
 
 	pWindow->getInput()->invokeMouseCallbacks(relativePosition);
@@ -257,7 +246,7 @@ void WindowGL::mouseCallback(GLFWwindow* pGlfwWindow, double x, double y) {
 
 void WindowGL::mouseWheelCallback(GLFWwindow* pGlfwWindow, double xoffset, double yoffset) {
 	WindowGL* pWindow = (WindowGL*)glfwGetWindowUserPointer(pGlfwWindow);
-	pWindow->getInput()->invokeMouseWheelCallbacks(glm::vec2((float) xoffset, (float) yoffset));
+	pWindow->getInput()->invokeMouseWheelCallbacks(glm::vec2((float)xoffset, (float)yoffset));
 }
 
 static void framebufferSizeCallback(GLFWwindow* pWindow, int width, int height) {
@@ -266,52 +255,91 @@ static void framebufferSizeCallback(GLFWwindow* pWindow, int width, int height) 
 	bool debug = pWindowGL->m_debug;
 
 	const int widthWindow = width;
-	//const int aspectRatio = pWindowGL->getAspectRatio()[0] / pWindowGL->getAspectRatio()[1];
+	// const int aspectRatio = pWindowGL->getAspectRatio()[0] / pWindowGL->getAspectRatio()[1];
 	const int heightWindow = height; // std::round(width / aspectRatio);
 	pWindowGL->setSize(widthWindow, heightWindow);
 
-	//pWindowGL->update();
+	// pWindowGL->update();
 }
 
 void GLAPIENTRY messageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
 	const GLchar* message, const void* userParam) {
 	// ignore non-significant error/warning codes
-	if(id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
+	if (id == 131169 || id == 131185 || id == 131218 || id == 131204)
+		return;
 
-    std::cout << "---------------" << std::endl;
-    std::cout << "Debug message (" << id << "): " <<  message << std::endl;
+	std::cout << "---------------" << std::endl;
+	std::cout << "Debug message (" << id << "): " << message << std::endl;
 
-    switch (source)
-    {
-        case GL_DEBUG_SOURCE_API:             std::cout << "Source: API"; break;
-        case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   std::cout << "Source: Window System"; break;
-        case GL_DEBUG_SOURCE_SHADER_COMPILER: std::cout << "Source: Shader Compiler"; break;
-        case GL_DEBUG_SOURCE_THIRD_PARTY:     std::cout << "Source: Third Party"; break;
-        case GL_DEBUG_SOURCE_APPLICATION:     std::cout << "Source: Application"; break;
-        case GL_DEBUG_SOURCE_OTHER:           std::cout << "Source: Other"; break;
-    } std::cout << std::endl;
+	switch (source) {
+	case GL_DEBUG_SOURCE_API:
+		std::cout << "Source: API";
+		break;
+	case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+		std::cout << "Source: Window System";
+		break;
+	case GL_DEBUG_SOURCE_SHADER_COMPILER:
+		std::cout << "Source: Shader Compiler";
+		break;
+	case GL_DEBUG_SOURCE_THIRD_PARTY:
+		std::cout << "Source: Third Party";
+		break;
+	case GL_DEBUG_SOURCE_APPLICATION:
+		std::cout << "Source: Application";
+		break;
+	case GL_DEBUG_SOURCE_OTHER:
+		std::cout << "Source: Other";
+		break;
+	}
+	std::cout << std::endl;
 
-    switch (type)
-    {
-        case GL_DEBUG_TYPE_ERROR:               std::cout << "Type: Error"; break;
-        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: std::cout << "Type: Deprecated Behaviour"; break;
-        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  std::cout << "Type: Undefined Behaviour"; break;
-        case GL_DEBUG_TYPE_PORTABILITY:         std::cout << "Type: Portability"; break;
-        case GL_DEBUG_TYPE_PERFORMANCE:         std::cout << "Type: Performance"; break;
-        case GL_DEBUG_TYPE_MARKER:              std::cout << "Type: Marker"; break;
-        case GL_DEBUG_TYPE_PUSH_GROUP:          std::cout << "Type: Push Group"; break;
-        case GL_DEBUG_TYPE_POP_GROUP:           std::cout << "Type: Pop Group"; break;
-        case GL_DEBUG_TYPE_OTHER:               std::cout << "Type: Other"; break;
-    } std::cout << std::endl;
+	switch (type) {
+	case GL_DEBUG_TYPE_ERROR:
+		std::cout << "Type: Error";
+		break;
+	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+		std::cout << "Type: Deprecated Behaviour";
+		break;
+	case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+		std::cout << "Type: Undefined Behaviour";
+		break;
+	case GL_DEBUG_TYPE_PORTABILITY:
+		std::cout << "Type: Portability";
+		break;
+	case GL_DEBUG_TYPE_PERFORMANCE:
+		std::cout << "Type: Performance";
+		break;
+	case GL_DEBUG_TYPE_MARKER:
+		std::cout << "Type: Marker";
+		break;
+	case GL_DEBUG_TYPE_PUSH_GROUP:
+		std::cout << "Type: Push Group";
+		break;
+	case GL_DEBUG_TYPE_POP_GROUP:
+		std::cout << "Type: Pop Group";
+		break;
+	case GL_DEBUG_TYPE_OTHER:
+		std::cout << "Type: Other";
+		break;
+	}
+	std::cout << std::endl;
 
-    switch (severity)
-    {
-        case GL_DEBUG_SEVERITY_HIGH:         std::cout << "Severity: high"; break;
-        case GL_DEBUG_SEVERITY_MEDIUM:       std::cout << "Severity: medium"; break;
-        case GL_DEBUG_SEVERITY_LOW:          std::cout << "Severity: low"; break;
-        case GL_DEBUG_SEVERITY_NOTIFICATION: std::cout << "Severity: notification"; break;
-    } std::cout << std::endl;
-    std::cout << std::endl;
+	switch (severity) {
+	case GL_DEBUG_SEVERITY_HIGH:
+		std::cout << "Severity: high";
+		break;
+	case GL_DEBUG_SEVERITY_MEDIUM:
+		std::cout << "Severity: medium";
+		break;
+	case GL_DEBUG_SEVERITY_LOW:
+		std::cout << "Severity: low";
+		break;
+	case GL_DEBUG_SEVERITY_NOTIFICATION:
+		std::cout << "Severity: notification";
+		break;
+	}
+	std::cout << std::endl;
+	std::cout << std::endl;
 	// fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
 	// 	(type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity, message);
 }
@@ -320,6 +348,17 @@ void WindowGL::resize() {
 	glfwSetWindowSize(m_pGlfwWindow, m_width, m_height);
 	glViewport(0, 0, m_width, m_height);
 	m_resizeCallback(m_width, m_height);
+
+	int fbWidth, fbHeight;
+	glfwGetFramebufferSize(m_pGlfwWindow, &fbWidth, &fbHeight);
+
+	// we usually want to transform screen cordinates to pixels
+	// ratio = pixels / screen_coords => pixels = screen_coords * ratio
+
+	float ratioWidth = static_cast<float>(fbWidth) / static_cast<float>(m_width);
+	float ratioHeight = static_cast<float>(fbHeight) / static_cast<float>(m_height);
+
+	m_pixelToScreenCoordRatio = glm::vec2(ratioWidth, ratioHeight);
 }
 
 void WindowGL::setWindowMode(WindowMode mode) {
@@ -348,5 +387,4 @@ void WindowGL::setWindowMode(WindowMode mode) {
 
 WindowMode WindowGL::getWindowMode() { return m_windowMode; }
 
-void WindowGL::changeWindowMode() {
-}
+void WindowGL::changeWindowMode() {}
