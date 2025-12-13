@@ -14,14 +14,12 @@ struct ColorQuad {
 	float zOffset;
 	float blurIntensity;
 
-	ColorQuad(glm::vec4 color)
-		: color(color) {}
+	ColorQuad(glm::vec4 color) : color(color) {}
 	ColorQuad(glm::vec4 color, RectangleVertices vertices, float zOffset, float blurIntensity)
 		: color(color),
 		  vertices(vertices),
 		  zOffset(zOffset),
-		  blurIntensity(blurIntensity)
-	{};
+		  blurIntensity(blurIntensity) {};
 };
 
 struct ImageQuad {
@@ -33,13 +31,13 @@ struct ImageQuad {
 
 class BackgroundRender {
 public:
-	BackgroundRender(IConsole* pConsole) : m_pConsole(pConsole){};
+	BackgroundRender(IConsole* pConsole) : m_pConsole(pConsole) {};
 	virtual ~BackgroundRender() = default;
 
 	virtual void renderColor(ColorQuad colorQuad) = 0;
 	virtual void renderImage(ImageQuad imageQuad) = 0;
-	virtual void renderColorStencil(ColorQuad colorQuad, RectangleVertices stencil) = 0;
-	virtual void renderImageStencil(ImageQuad imageQuad, RectangleVertices stencil) = 0;
+	virtual void renderColorStencils(ColorQuad colorQuad, const std::vector<RectangleVertices>& stencils) = 0;
+	virtual void renderImageStencils(ImageQuad imageQuad, const std::vector<RectangleVertices>& stencils) = 0;
 	virtual void frame() = 0;
 	virtual void reload() = 0;
 	virtual void enableScissors(float x, float y, float width, float height) = 0;

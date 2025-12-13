@@ -61,11 +61,9 @@ Game::Game(IWindow* pWindow, Tier0* pTier0, std::filesystem::path resourceDir) {
 	m_pTier0 = pTier0;
 	m_pTier1 = new Tier1(m_pResource, pTier0);
 
-	m_pActionControl =
-		new ActionControl(pWindow->getInput(), m_pTier0->getParameters(), m_pTier0->getConsole());
+	m_pActionControl = new ActionControl(pWindow->getInput(), m_pTier0->getParameters(), m_pTier0->getConsole());
 
-	m_pConsoleGui = new ConsoleGui(
-		m_pTier0->getConsole(), m_pTier0->getImGuiFonts(), m_pTier0->getParameters());
+	m_pConsoleGui = new ConsoleGui(m_pTier0->getConsole(), m_pTier0->getImGuiFonts(), m_pTier0->getParameters());
 
 	m_pInput = m_pWindow->getInput();
 
@@ -77,17 +75,18 @@ Game::Game(IWindow* pWindow, Tier0* pTier0, std::filesystem::path resourceDir) {
 	m_pGraphics = new Graphics(m_pTier0, m_pWindow, m_pResource, m_pWorld, m_pCamera, pGuiPresenter);
 
 	const auto fontPath = resourceDir / "dev/fonts/IBM_Plex_Mono/IBMPlexMono-Regular.ttf";
-	GuiDependenciesFabric* pGuiDependenciesFabric = new GuiDependenciesFabricGl(m_pTier0->getConsole(), m_pGraphics->getLoaderFabric()->getShaderLoaderGl(),
+	GuiDependenciesFabric* pGuiDependenciesFabric =
+		new GuiDependenciesFabricGl(m_pTier0->getConsole(), m_pGraphics->getLoaderFabric()->getShaderLoaderGl(),
 			m_pInput, m_pGraphics->getTextureManager(), m_pGraphics->getFramebufferController(), m_pWindow, fontPath);
 
-	m_pGui = new Gui(pGuiPresenter, m_pTier0, pGuiDependenciesFabric, m_pInput, m_pActionControl, m_pGraphics->getSettings(),
-		m_pCamera, &m_pWorld->getRegistry());
+	m_pGui = new Gui(pGuiPresenter, m_pTier0, pGuiDependenciesFabric, m_pInput, m_pActionControl,
+		m_pGraphics->getSettings(), m_pCamera, &m_pWorld->getRegistry());
 
 	m_pWindow->setCreationCallback([this, pGuiDependenciesFabric]() {
 		m_pGraphics->init();
 		pGuiDependenciesFabric->getDependencies().pBackgroundRender->reload();
 		pGuiDependenciesFabric->getDependencies().pTextRender->reload();
-		});
+	});
 
 	PhysicalConstants* pPhysicalConstants = new PhysicalConstants(m_pTier0->getParameters(), m_pTier0->getConsole());
 
@@ -105,10 +104,10 @@ Game::Game(IWindow* pWindow, Tier0* pTier0, std::filesystem::path resourceDir) {
 	m_pNpcSystem = new NpcSystem(m_pTier0->getParameters(), m_pWorld);
 
 	m_pControlSystem = new ControlSystem(m_pGraphics->getSettings(), m_pInput, m_pCamera, m_pActionControl, pPhysics,
-		m_pGui->getPointerOverGui(),
-		&m_pWorld->getRegistry());
+		m_pGui->getPointerOverGui(), &m_pWorld->getRegistry());
 
-	m_pGameSystems = new GameSystems(&m_pWorld->getRegistry(), m_pResource, pPhysicalConstants, m_pTier0->getConsole(), m_pTier0->getParameters());
+	m_pGameSystems = new GameSystems(
+		&m_pWorld->getRegistry(), m_pResource, pPhysicalConstants, m_pTier0->getConsole(), m_pTier0->getParameters());
 }
 
 Game::~Game() {
@@ -125,23 +124,24 @@ void Game::init() {
 	m_pWorld->loadScene("dev", "test");
 
 	entt::entity skyboxEntity = m_pWorld->getRegistry().create();
-	m_pWorld->getRegistry().emplace<SkyboxRequest>(skyboxEntity, SkyboxRequest("dev", "anime"));
+	// m_pWorld->getRegistry().emplace<SkyboxRequest>(skyboxEntity, SkyboxRequest("dev", "anime"));
 
 	auto dirLight = m_pWorld->getRegistry().create(); // temp
 	auto& dirLightComponent = m_pWorld->getRegistry().emplace<DirectionalLight>(dirLight);
 	dirLightComponent.color = glm::vec3(1, 1, 1);
 	dirLightComponent.direction = glm::vec3(-0.2f, -1.0f, -0.3f);
 
-	m_pInput->addMappedKeyCallback(KeyCode::GRAVE_ACCENT, [pConsoleGui = this->m_pConsoleGui, pWindow = this->m_pWindow]() {
-		if (pConsoleGui->isOpened()) {
-			pConsoleGui->close();
-		}
-		else {
-			pConsoleGui->open();
-		}
-	});
+	m_pInput->addMappedKeyCallback(
+		KeyCode::GRAVE_ACCENT, [pConsoleGui = this->m_pConsoleGui, pWindow = this->m_pWindow]() {
+			if (pConsoleGui->isOpened()) {
+				pConsoleGui->close();
+			}
+			else {
+				pConsoleGui->open();
+			}
+		});
 
-	//m_pInput->addMappedKeyCallback(KeyCode::B, [this]() {
+	// m_pInput->addMappedKeyCallback(KeyCode::B, [this]() {
 	//	entt::registry* registry = &m_pScene->getSceneRegistry();
 	//	entt::entity entity = registry->create();
 
@@ -155,17 +155,16 @@ void Game::init() {
 	//	registry->emplace<RaycastQuery>(entity, raycastQuery);
 	//});
 
-	m_pInput->addMappedKeyCallback(
-		KeyCode::F3, [this]() {
-			if (m_pWindow->getCursorMode() == CursorMode::CURSOR_DISABLED) {
-				m_pWindow->setCursorMode(CursorMode::CURSOR_ENABLED);
-				m_guiMode = true;
-			}
-			else {
-				m_pWindow->setCursorMode(CursorMode::CURSOR_DISABLED);
-				m_guiMode = false;
-			}
-		});
+	m_pInput->addMappedKeyCallback(KeyCode::F3, [this]() {
+		if (m_pWindow->getCursorMode() == CursorMode::CURSOR_DISABLED) {
+			m_pWindow->setCursorMode(CursorMode::CURSOR_ENABLED);
+			m_guiMode = true;
+		}
+		else {
+			m_pWindow->setCursorMode(CursorMode::CURSOR_DISABLED);
+			m_guiMode = false;
+		}
+	});
 
 	m_pInput->addMappedKeyCallback(KeyCode::F3, [this]() {
 		if (m_pWindow->getCursorMode() == CursorMode::CURSOR_DISABLED) {
@@ -277,14 +276,14 @@ void Game::input(double deltaTime) {
 		exit(0);
 	}
 
-	//if (m_pWindow->getMode() == WindowMode::CURSOR_ENABLED) {
+	// if (m_pWindow->getMode() == WindowMode::CURSOR_ENABLED) {
 	//	m_lastMousePosX = m_pInput->getMousePosition().x;
 	//	m_lastMousePosY = m_pInput->getMousePosition().y;
 	//	return;
-	//}
+	// }
 
-	float offsetMouseX = (float)(m_pInput->getMousePosition().x- m_lastMousePosX);
-	float offsetMouseY = (float)(m_pInput->getMousePosition().y-m_lastMousePosY);
+	float offsetMouseX = (float)(m_pInput->getMousePosition().x - m_lastMousePosX);
+	float offsetMouseY = (float)(m_pInput->getMousePosition().y - m_lastMousePosY);
 
 	m_lastMousePosX = m_pInput->getMousePosition().x;
 	m_lastMousePosY = m_pInput->getMousePosition().y;
@@ -295,7 +294,7 @@ void Game::input(double deltaTime) {
 	if (!m_pConsoleGui->isOpened()) {
 		m_pControlSystem->input(deltaTime);
 	}
-	//m_pCamera->setPosition(cameraPos);
+	// m_pCamera->setPosition(cameraPos);
 
 	m_pGameSystems->input(deltaTime);
 }
@@ -306,7 +305,7 @@ void Game::update(double updateInterval) {
 	entt::entity surface;
 	entt::entity surfaceScene;
 
-	//if (pMapRegistry->view<Mesh>().size() == 0) {
+	// if (pMapRegistry->view<Mesh>().size() == 0) {
 	//	surface = pMapRegistry->create();
 	//	surfaceScene = pRegistry->create();
 
@@ -328,7 +327,7 @@ void Game::update(double updateInterval) {
 		skybox.lightStrength = 0.4f;
 	}
 
-	//if (pMapRegistry->view<Mesh>().size() == 0) {
+	// if (pMapRegistry->view<Mesh>().size() == 0) {
 	//	m_pGraphicsSystems->update();
 	//	Model* model = &pRegistry->get<Model>(surfaceScene);
 	//	auto meshEnt = model->meshes.at(0);
@@ -346,12 +345,12 @@ void Game::update(double updateInterval) {
 	//	pMapRegistry->emplace<Transform>(surface, glm::vec3(0, -1, 0), glm::vec3(0, 0, 0), glm::vec3(100, 0.1, 100));
 	//}
 
-	//for (auto& entity : view) {
+	// for (auto& entity : view) {
 	//	if (view.get<Properties>(entity).id == "cube") {
 	//		auto& transform = view.get<Transform>(entity);
 	//		transform.rotation *= glm::angleAxis(glm::radians(1.f), glm::vec3(0.f, 1.f, 0.f));
 	//	}
-	//}
+	// }
 }
 
 void Game::render() {

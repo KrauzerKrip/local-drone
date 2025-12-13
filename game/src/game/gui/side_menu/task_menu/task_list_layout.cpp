@@ -7,19 +7,19 @@
 TaskListLayout::TaskListLayout(unsigned int taskSlots, GuiDependencies dependencies) {
 	m_taskSlots = taskSlots;
 
-    for (unsigned int i = 0; i < taskSlots; i++) {
+	for (unsigned int i = 0; i < taskSlots; i++) {
 		TaskView* pTaskView = new TaskView(dependencies);
 		m_taskViews.push_back(pTaskView);
 		pTaskView->setName("task_view_" + std::to_string(i));
-    }
+	}
 }
 
 void TaskListLayout::updateChildWidgets() {
-	glm::vec2 spacing(2.5, 5);
+	glm::vec2 spacing(5, 5);
 	float cursorY = m_size.y;
 
-    for (TaskView* pTaskView : m_activeTaskViews) {
-		pTaskView->getRectangle().m_size.x = m_size.x - 2 * spacing.x; 
+	for (TaskView* pTaskView : m_activeTaskViews) {
+		pTaskView->getRectangle().m_size.x = m_size.x - 2 * spacing.x;
 		pTaskView->getRectangle().m_size.y = pTaskView->getSize().y;
 
 		glm::vec2 position = glm::vec2(0);
@@ -31,9 +31,8 @@ void TaskListLayout::updateChildWidgets() {
 
 		pTaskView->getRectangle().m_absolutePosition += position;
 
-        //std::cout << "ABSOLUTE POS_Y: " << pTaskView->getRectangle().m_absolutePosition.y << std::endl;
+		// std::cout << "ABSOLUTE POS_Y: " << pTaskView->getRectangle().m_absolutePosition.y << std::endl;
 	}
-
 }
 
 void TaskListLayout::setTasks(const std::vector<TaskData>& tasksData) {
@@ -41,7 +40,7 @@ void TaskListLayout::setTasks(const std::vector<TaskData>& tasksData) {
 		throw std::invalid_argument("tasksData.size() > m_taskSlots");
 	}
 
-    m_tasksData = tasksData;
+	m_tasksData = tasksData;
 
 	m_activeTaskViews.clear();
 
@@ -54,9 +53,9 @@ void TaskListLayout::setTasks(const std::vector<TaskData>& tasksData) {
 }
 
 void TaskListLayout::hide() {
-    for (Widget* pWidget : m_taskViews) {
+	for (Widget* pWidget : m_taskViews) {
 		pWidget->hideWithChildren();
-    }
+	}
 }
 
 void TaskListLayout::show() {
@@ -72,4 +71,3 @@ std::vector<Widget*>& TaskListLayout::getChildrenWidgets() {
 	}
 	return m_widgets;
 }
-
