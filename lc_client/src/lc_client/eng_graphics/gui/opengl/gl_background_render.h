@@ -25,8 +25,8 @@ public:
 
 	void renderColor(ColorQuad colorQuad) override;
 	void renderImage(ImageQuad imageQuad) override;
-	void renderColorStencil(ColorQuad colorQuad, RectangleVertices stencil);
-	void renderImageStencil(ImageQuad imageQuad, RectangleVertices stencil);
+	void renderColorStencils(ColorQuad colorQuad, const std::vector<RectangleVertices>& stencils);
+	void renderImageStencils(ImageQuad imageQuad, const std::vector<RectangleVertices>& stencils);
 	void frame() override;
 	void reload() override;
 	void enableScissors(float x, float y, float width, float height) override;

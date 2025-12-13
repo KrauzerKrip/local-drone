@@ -2,13 +2,14 @@
 
 #include <glad/glad.h>
 #include <glm/gtc/matrix_transform.hpp>
-#include<glm/gtc/type_ptr.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
+#include "lc_client/eng_graphics/gui/background_render.h"
 #include "lc_client/eng_graphics/opengl/gl_shader_uniform.h"
 
 
-BackgroundRenderGl::BackgroundRenderGl(IConsole* pConsole, ShaderLoaderGl* pShaderLoader, TextureManager* pTextureManager,
-	FramebufferController* pFramebufferController, IWindow* pWindow)
+BackgroundRenderGl::BackgroundRenderGl(IConsole* pConsole, ShaderLoaderGl* pShaderLoader,
+	TextureManager* pTextureManager, FramebufferController* pFramebufferController, IWindow* pWindow)
 	: BackgroundRender(m_pConsole) {
 	m_pTextureManager = pTextureManager;
 	m_pFramebufferController = pFramebufferController;
@@ -51,7 +52,7 @@ void BackgroundRenderGl::renderColor(ColorQuad colorQuad) {
 	if (colorQuad.blurIntensity != 0) {
 		m_pFramebufferController->getBlurFramebuffer()->bind();
 		m_pFramebufferController->getFramebuffer()->bindTexture();
-		 
+
 		setUniform(shader, "sigma", colorQuad.blurIntensity);
 		setUniform(shader, "direction", glm::vec2(1.0f, 0.0f));
 		setUniform(shader, "screenTexture", TextureType::FRAMEBUFFER);
@@ -99,13 +100,9 @@ void BackgroundRenderGl::renderImage(ImageQuad imageQuad) {
 	glm::vec2 topRight = imageQuad.vertices.topRight;
 	glm::vec2 bottomRight = imageQuad.vertices.bottomRight;
 
-    float vertices[6][4] = {
-        {topLeft.x, topLeft.y, 0.0f, 0.0f},
-	    {bottomLeft.x, bottomLeft.y, 0.0f, 1.0f},
-		{bottomRight.x, bottomRight.y, 1.0f, 1.0f},
-		{topLeft.x, topLeft.y, 0.0f, 0.0f},
-		{bottomRight.x, bottomRight.y, 1.0f, 1.0f},
-		{topRight.x, topRight.y, 1.0f, 0.0f}};
+	float vertices[6][4] = {{topLeft.x, topLeft.y, 0.0f, 0.0f}, {bottomLeft.x, bottomLeft.y, 0.0f, 1.0f},
+		{bottomRight.x, bottomRight.y, 1.0f, 1.0f}, {topLeft.x, topLeft.y, 0.0f, 0.0f},
+		{bottomRight.x, bottomRight.y, 1.0f, 1.0f}, {topRight.x, topRight.y, 1.0f, 0.0f}};
 
 	setUniform(m_imageShader, "zOffset", imageQuad.zOffset);
 	setUniform(m_imageShader, "image", TextureType::IMAGE);
@@ -121,18 +118,7 @@ void BackgroundRenderGl::renderImage(ImageQuad imageQuad) {
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void BackgroundRenderGl::renderColorStencil(ColorQuad colorQuad, RectangleVertices stencil) {
-	glm::vec2 bottomLeft = stencil.bottomLeft;
-	glm::vec2 topLeft = stencil.topLeft;
-	glm::vec2 topRight = stencil.topRight;
-	glm::vec2 bottomRight = stencil.bottomRight;
-
-	float vertices[6][4] = {{topLeft.x, topLeft.y, 0.0f, 1.0f}, {bottomLeft.x, bottomLeft.y, 0.0f, 0.0f},
-		{bottomRight.x, bottomRight.y, 1.0f, 0.0f},
-
-		{topLeft.x, topLeft.y, 0.0f, 1.0f}, {bottomRight.x, bottomRight.y, 1.0f, 0.0f},
-		{topRight.x, topRight.y, 1.0f, 1.0f}};
-
+void BackgroundRenderGl::renderColorStencils(ColorQuad colorQuad, const std::vector<RectangleVertices>& stencils) {
 	glUseProgram(m_colorShader);
 	setUniform(m_colorShader, "quadColor", glm::vec4(0, 0, 0, 0));
 
@@ -141,13 +127,27 @@ void BackgroundRenderGl::renderColorStencil(ColorQuad colorQuad, RectangleVertic
 	glActiveTexture(GL_TEXTURE0);
 	glBindVertexArray(m_vao);
 
-	glStencilFunc(GL_ALWAYS, 1, 0xFF); 
+	glStencilFunc(GL_ALWAYS, 1, 0xFF);
 	glStencilMask(0xFF);
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	for (auto& stencil : stencils) {
+		glm::vec2 bottomLeft = stencil.bottomLeft;
+		glm::vec2 topLeft = stencil.topLeft;
+		glm::vec2 topRight = stencil.topRight;
+		glm::vec2 bottomRight = stencil.bottomRight;
+
+		float vertices[6][4] = {{topLeft.x, topLeft.y, 0.0f, 1.0f}, {bottomLeft.x, bottomLeft.y, 0.0f, 0.0f},
+			{bottomRight.x, bottomRight.y, 1.0f, 0.0f},
+
+			{topLeft.x, topLeft.y, 0.0f, 1.0f}, {bottomRight.x, bottomRight.y, 1.0f, 0.0f},
+			{topRight.x, topRight.y, 1.0f, 1.0f}};
+
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+	}
 
 	glStencilFunc(GL_GREATER, 1, 0xFF);
 	glStencilMask(0x00);
@@ -160,18 +160,7 @@ void BackgroundRenderGl::renderColorStencil(ColorQuad colorQuad, RectangleVertic
 	glStencilFunc(GL_ALWAYS, 1, 0xFF);
 }
 
-void BackgroundRenderGl::renderImageStencil(ImageQuad imageQuad, RectangleVertices stencil) {
-	glm::vec2 bottomLeft = stencil.bottomLeft;
-	glm::vec2 topLeft = stencil.topLeft;
-	glm::vec2 topRight = stencil.topRight;
-	glm::vec2 bottomRight = stencil.bottomRight;
-
-	float vertices[6][4] = {{topLeft.x, topLeft.y, 0.0f, 1.0f}, {bottomLeft.x, bottomLeft.y, 0.0f, 0.0f},
-		{bottomRight.x, bottomRight.y, 1.0f, 0.0f},
-
-		{topLeft.x, topLeft.y, 0.0f, 1.0f}, {bottomRight.x, bottomRight.y, 1.0f, 0.0f},
-		{topRight.x, topRight.y, 1.0f, 1.0f}};
-
+void BackgroundRenderGl::renderImageStencils(ImageQuad imageQuad, const std::vector<RectangleVertices>& stencils) {
 	glUseProgram(m_colorShader);
 	setUniform(m_colorShader, "quadColor", glm::vec4(0, 0, 0, 0));
 
@@ -184,9 +173,23 @@ void BackgroundRenderGl::renderImageStencil(ImageQuad imageQuad, RectangleVertic
 	glStencilMask(0xFF);
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	for (auto& stencil : stencils) {
+		glm::vec2 bottomLeft = stencil.bottomLeft;
+		glm::vec2 topLeft = stencil.topLeft;
+		glm::vec2 topRight = stencil.topRight;
+		glm::vec2 bottomRight = stencil.bottomRight;
+
+		float vertices[6][4] = {{topLeft.x, topLeft.y, 0.0f, 1.0f}, {bottomLeft.x, bottomLeft.y, 0.0f, 0.0f},
+			{bottomRight.x, bottomRight.y, 1.0f, 0.0f},
+
+			{topLeft.x, topLeft.y, 0.0f, 1.0f}, {bottomRight.x, bottomRight.y, 1.0f, 0.0f},
+			{topRight.x, topRight.y, 1.0f, 1.0f}};
+
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+	}
 
 	glStencilFunc(GL_GREATER, 1, 0xFF);
 	glStencilMask(0x00);
@@ -231,7 +234,7 @@ void BackgroundRenderGl::reload() {
 	glBindVertexArray(0);
 }
 
-void BackgroundRenderGl::enableScissors(float x, float y, float width, float height) { 
+void BackgroundRenderGl::enableScissors(float x, float y, float width, float height) {
 	glEnable(GL_SCISSOR_TEST);
 	glScissor(x, y, width, height);
 }

@@ -3,7 +3,7 @@
 #include <iostream>
 
 
-ScrollWidget::ScrollWidget(GuiDependencies dependencies) : m_dependencies(dependencies) { 
+ScrollWidget::ScrollWidget(GuiDependencies dependencies) : m_dependencies(dependencies) {
 	m_isMouseScrolling = false;
 	m_lastMousePosition = glm::vec2(0);
 	m_scrollbarWidth = 32;
@@ -25,7 +25,7 @@ ScrollWidget::ScrollWidget(GuiDependencies dependencies) : m_dependencies(depend
 	m_pVerticalScrollArea = new VerticalScrollArea();
 	m_pScrollAreaWidget->setLayout(m_pVerticalScrollArea);
 	m_pVerticalScrollArea->setSpacing(5);
-	
+
 	m_pScrollbar = new Widget();
 	pHBox->addChild(m_pScrollbar);
 	m_pScrollbar->setName("scrollbar");
@@ -61,11 +61,11 @@ void ScrollWidget::render() {
 
 	int scrollThumbPosY = (scrollspace - scrollThumbHeight) * (1.0f - m_pVerticalScrollArea->getVerticalScroll()) + m_scrollbarPadding.y;
 	m_pScrollThumb->setPosition(m_scrollbarPadding.x, scrollThumbPosY);
-	
+
 	this->setWidgetInteractiveAreas(m_pVerticalScrollArea);
 
-	m_dependencies.pBackgroundRender->enableScissors(m_rectangle.m_absolutePosition.x, 
-		m_rectangle.m_absolutePosition.y, 
+	m_dependencies.pBackgroundRender->enableScissors(m_rectangle.m_absolutePosition.x,
+		m_rectangle.m_absolutePosition.y,
 		m_rectangle.m_size.x,
 		m_rectangle.m_size.y);
 
@@ -101,7 +101,7 @@ void ScrollWidget::setScrollSpeed(float scrollSpeed) { m_scrollSpeed = scrollSpe
 
 void ScrollWidget::clear() { m_pVerticalScrollArea->clearWidgets(); }
 
-void ScrollWidget::input() { 
+void ScrollWidget::input() {
 	InputController* pInputController = m_dependencies.pInputController;
 
 	if (pInputController->isKeyPressed(KeyCode::MOUSE_BUTTON_LEFT)) {
@@ -121,7 +121,7 @@ void ScrollWidget::input() {
 	m_lastMousePosition = pos;
 }
 
-void ScrollWidget::setWidgetInteractiveAreas(Layout* pLayout) { 
+void ScrollWidget::setWidgetInteractiveAreas(Layout* pLayout) {
 	for (Widget* pWidget : pLayout->getChildrenWidgets()) {
 		pWidget->setInteractiveArea(m_rectangle);
 		if (pWidget->getLayout()) {

@@ -13,6 +13,7 @@ public:
 
 	void setStencil(Rectangle& rectangle);
 	void render(const Rectangle& rectangle, const Layer& layer) override;
+	void setStencils(std::vector<Rectangle> rectangles) override;
 
 private:
 	GuiDependencies m_dependencies;
@@ -21,4 +22,5 @@ private:
 	BackgroundRender* m_pBackgroundRender = nullptr;
 	bool m_hasStencil;
 	Rectangle m_stencil;
+	std::vector<Rectangle> m_stencils;
 };

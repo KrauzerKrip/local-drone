@@ -16,7 +16,7 @@
 class Layout;
 
 enum class SizePolicy { FIXED, RESIZE };
-enum class LayoutPolicy {CHILD, FREE };
+enum class LayoutPolicy { CHILD, FREE };
 
 
 class Widget {
@@ -25,7 +25,7 @@ public:
 	Widget(GuiDependencies dependencies);
 	Widget();
 	virtual ~Widget() = default;
-	
+
 	virtual void show();
 	virtual void showWithChildren();
 	virtual void hide();

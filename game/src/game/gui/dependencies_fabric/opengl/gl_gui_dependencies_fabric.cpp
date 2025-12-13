@@ -8,7 +8,8 @@
 
 
 GuiDependenciesFabricGl::GuiDependenciesFabricGl(IConsole* pConsole, ShaderLoaderGl* pShaderWorkGl, IInput* pInput,
-	TextureManager* pTextureManager, FramebufferController* pFramebufferController, IWindow* pWindow, std::filesystem::path fontPath) {
+	TextureManager* pTextureManager, FramebufferController* pFramebufferController, IWindow* pWindow,
+	std::filesystem::path fontPath) {
 	BackgroundRenderGl* pBackgroundRender =
 		new BackgroundRenderGl(pConsole, pShaderWorkGl, pTextureManager, pFramebufferController, pWindow);
 	TextRenderGl* pTextRender = new TextRenderGl(pWindow, pConsole, pShaderWorkGl, fontPath);
@@ -16,15 +17,17 @@ GuiDependenciesFabricGl::GuiDependenciesFabricGl(IConsole* pConsole, ShaderLoade
 	TextZOffsetCalculatorGl* pTextZOffsetCalculator = new TextZOffsetCalculatorGl();
 	InputController* pInputController = new InputController(pInput);
 
+	// @TODO move somewhere
 	StyleImpl* pStyle = new StyleImpl();
+	// pStyle->setColor("blur_background_base", 160, 160, 160, 255);
 	pStyle->setColor("blur_background_base", 160, 160, 160, 255);
-	pStyle->setColor("blur_background_dark", 72, 72, 72, 255);
-	pStyle->setColor("background_base", 140, 140, 140, 150);
-	pStyle->setColor("background_dark", 72, 72, 72, 150);
-	pStyle->setColor("button", 72, 72, 72, 150);
-	pStyle->setColor("button_hover", 48, 48, 48, 150);
-	pStyle->setColor("background_inaccessible", 121, 121, 121, 150);
-	pStyle->setColor("button_inaccessible", 91, 91, 91, 150);
+	pStyle->setColor("blur_background_dark", 32, 32, 32, 255);
+	pStyle->setColor("background_base", 255, 255, 255, 255);
+	pStyle->setColor("background_dark", 0, 0, 0, 255);
+	pStyle->setColor("button", 239, 225, 9, 255);
+	pStyle->setColor("button_hover", 48, 48, 48, 255);
+	pStyle->setColor("background_inaccessible", 121, 121, 121, 255);
+	pStyle->setColor("button_inaccessible", 91, 91, 91, 255);
 	pStyle->setBlurIntensitry("base", 0.05);
 
 	m_dependecies.pBackgroundRender = pBackgroundRender;
