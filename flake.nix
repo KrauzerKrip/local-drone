@@ -9,7 +9,7 @@
     let
       system = "x86_64-linux";
       pkgs = import inputs.nixpkgs { inherit system; };
-
+      pythonVersion = "3.10.1";
       supportedSystems = [
         "x86_64-linux"
         "aarch64-linux"
@@ -30,52 +30,52 @@
         pname = "game";
         version = "0.1.0";
 
-         src = ./.;
+        src = ./.;
 
-         nativeBuildInputs = with pkgs; [
-           clang-tools
-           cmake
-           cppcheck
-           ninja
-           pkg-config
-         ];
-         buildInputs = with pkgs; [
-           clang-tools
-           cmake
-           codespell
-           conan
-           cppcheck
-           doxygen
-           gtest
-           lcov
-           vcpkg
-           vcpkg-tool
-           ninja
-           pkg-config
+        nativeBuildInputs = with pkgs; [
+          clang-tools
+          cmake
+          cppcheck
+          ninja
+          pkg-config
+        ];
+        buildInputs = with pkgs; [
+          clang-tools
+          cmake
+          codespell
+          conan
+          cppcheck
+          doxygen
+          gtest
+          lcov
+          vcpkg
+          vcpkg-tool
+          ninja
+          pkg-config
 
-           lua
-           glfw
-           assimp
-           entt
-           freetype
-           glm
-           imgui
-           nlohmann_json
-           pugixml
-           luabridge
+          lua
+          glfw
+          assimp
+          entt
+          freetype
+          glm
+          imgui
+          nlohmann_json
+          pugixml
+          luabridge
 
-           xorg.libX11
-           xorg.libXext
-           xorg.libXrandr
-           xorg.libXrender
-           xorg.libXfixes
-           xorg.libXcursor
-           xorg.libXi
+          xorg.libX11
+          xorg.libXext
+          xorg.libXrandr
+          xorg.libXrender
+          xorg.libXfixes
+          xorg.libXcursor
+          xorg.libXi
 
-           mesa
-           libGL
-           libGLU
-         ];
+          mesa
+          libGL
+          libGLU
+        ];
       };
 
       devShells = forEachSupportedSystem (
@@ -103,6 +103,8 @@
                     vcpkg-tool
                     ninja
                     pkg-config
+                    cmake-format
+                    nixfmt
 
                     lua
                     glfw
