@@ -20,6 +20,7 @@ add_subdirectory("src/game/inventory")
 add_subdirectory("src/game/economy")
 add_subdirectory("src/game/resource")
 add_subdirectory("src/game/util")
+add_subdirectory("src/game/cable")
 
 target_include_directories(game
     PUBLIC

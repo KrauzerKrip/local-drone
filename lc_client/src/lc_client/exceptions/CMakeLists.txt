@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.13)
 
 project(exceptions)
 
-target_sources(lc_client 
+target_sources(lc_client
     PRIVATE
         "glad_exceptions.h"
         "glfw_exceptions.h"
@@ -14,4 +14,5 @@ target_sources(lc_client
         "graphics_exceptions.h"
         "npc_exceptions.h"
         "physics_exception.h"
+        "component_exception.h"
 )
