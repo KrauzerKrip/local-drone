@@ -9,12 +9,7 @@
 #include <entt/entt.hpp>
 
 
-enum class ColliderType {
-	BOX,
-	AABB,
-	SPHERE,
-	CAPSULE
-};
+enum class ColliderType { BOX, AABB, SPHERE, CAPSULE };
 
 
 struct PhysicsRequest {
@@ -27,19 +22,23 @@ struct Colliders {
 	std::vector<std::tuple<entt::entity, ColliderType>> colliders;
 };
 
-struct BoxCollider {
-}; 
+struct BoxCollider {};
 
-                             
+struct SphereOverlapQuery {
+	glm::vec3 center;
+	float radius;
+};
+
+
 /*	 4-----------7            Y
-	/ |         /|            | 
+	/ |         /|            |
 	0----------3 |            |
 	| 5        | 6            0-------X
 	|/		   |/            /
-   	1----------2      	    /
+	1----------2      	    /
 						   Z
 
-*/						 
+*/
 struct BoxColliderVertices {
 	std::vector<glm::vec3> vertices;
 };
@@ -48,7 +47,7 @@ struct RaycastQuery {
 	glm::vec3 position;
 	glm::vec3 direction;
 
-	RaycastQuery(glm::vec3 position, glm::vec3 direction) : position(position), direction(direction){};
+	RaycastQuery(glm::vec3 position, glm::vec3 direction) : position(position), direction(direction) {};
 };
 
 struct RaycastResult {
@@ -60,6 +59,5 @@ struct RaycastResult {
 		std::optional<float> intersectionDistance)
 		: entityIntersectedWith(entityIntersectedWith),
 		  intersectionPoint(intersectionPoint),
-		  intersectionDistance(intersectionDistance){};
+		  intersectionDistance(intersectionDistance) {};
 };
-
