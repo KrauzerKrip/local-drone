@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <glm/vec3.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <vector>
@@ -24,23 +25,25 @@ struct CableParticle {
 	glm::quat prevRotation;
 };
 
-struct CableConstraint {
-	size_t indexA;
-	size_t indexB;
+struct CableDistanceConstraint {
+	size_t indexParticleA;
+	size_t indexParticleB;
 	float lambda;
 	float restDistance;
+	float compliance;
+};
+
+struct CableCollisionConstraint {
+	size_t particleIndex;
+	glm::vec3 normal;
+	float c;
+	float lambda;
 	float compliance;
 };
 
 struct Cable {
 	// cache friendly data allocation
 	std::vector<CableParticle> particles;
-	std::vector<CableConstraint> constraints;
+	std::vector<CableDistanceConstraint> constraints;
+	std::vector<CableCollisionConstraint> collisionConstraints;
 };
-
-struct CableCollisionConstraint {
-	glm::vec3 normal;
-	float c;
-	float lambda;
-	float compliance;
-}
