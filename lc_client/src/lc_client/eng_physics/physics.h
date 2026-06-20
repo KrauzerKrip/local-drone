@@ -43,7 +43,7 @@ void Physics::querySphereOverlaps(
 
 	Sphere sphere(query.center, query.radius);
 
-	for (auto&& [entity, colliders, transform] : entities) {
+	for (auto&& [entity, colliders, transform] : entities.each()) {
 		for (auto&& [colliderEnt, colliderType] : colliders.colliders) {
 			if (colliderType == ColliderType::BOX) {
 				Transform& colliderTransform = m_pRegistry->get<Transform>(colliderEnt);

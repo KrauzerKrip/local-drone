@@ -2,6 +2,8 @@
 
 #include <entt/entt.hpp>
 
+#include "game/cable/cable_system.h"
+#include "lc_client/eng_physics/physics.h"
 #include "lc_client/util/i_eng_resource.h"
 #include "machine/physics/physical_constants.h"
 
@@ -16,8 +18,8 @@
 
 class GameSystems {
 public:
-	GameSystems(entt::registry* pRegistry, eng::IResource* pResource, PhysicalConstants* pPhysicalConstants,
-		IConsole* pConsole, Parameters* pParameters);
+	GameSystems(entt::registry* pRegistry, eng::IResource* pResource, Physics* pPhysics,
+		PhysicalConstants* pPhysicalConstants, IConsole* pConsole, Parameters* pParameters);
 
 	void input(double deltaTime);
 	void update(double updateInterval);
@@ -31,4 +33,5 @@ private:
 	InventorySystem m_inventorySystem;
 	TradeSystem m_tradeSystem;
 	DepositSystem m_depositSystem;
+	CableSystem m_cableSystem;
 };

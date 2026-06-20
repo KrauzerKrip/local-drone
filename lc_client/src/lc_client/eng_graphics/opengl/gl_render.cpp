@@ -20,8 +20,7 @@
 #include "lc_client/tier0/tier0.h"
 
 
-RenderGL::RenderGL(IWindow* pWindow, Camera* pCamera, ShaderLoaderGl* pShaderWork,
-	SkyboxRenderGl* pSkyboxRender,
+RenderGL::RenderGL(IWindow* pWindow, Camera* pCamera, ShaderLoaderGl* pShaderWork, SkyboxRenderGl* pSkyboxRender,
 	FramebufferController* pFramebufferController, GuiPresenter* pGuiPresenter, GraphicsSettings* pGraphicsSettings) {
 	m_pWindow = pWindow; // mb remove it
 	m_pCamera = pCamera;
@@ -57,14 +56,14 @@ void RenderGL::init() {
 }
 
 void RenderGL::render() {
-    Framebuffer* pFramebuffer = m_pFramebufferController->getFramebuffer();
+	Framebuffer* pFramebuffer = m_pFramebufferController->getFramebuffer();
 
-    #ifdef LE_DEBUG
-    // @TODO: better add Framebuffer::resize that reallocates framebuffer attachments, i.e textures and etc
-    assert(pFramebuffer != nullptr && "couldn't get framebuffer from controller");
-    #endif
+#ifdef LE_DEBUG
+	// @TODO: better add Framebuffer::resize that reallocates framebuffer attachments, i.e textures and etc
+	assert(pFramebuffer != nullptr && "couldn't get framebuffer from controller");
+#endif
 
-    glBindTexture(GL_TEXTURE_2D, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
 	m_pFramebufferController->getFramebuffer()->bind();
 
@@ -119,7 +118,7 @@ void RenderGL::setDependecies(World* pWorld) {
 
 	m_pLighting = new LightingGl(m_pRegistry, m_pCamera);
 
-    m_pMeshRender = new MeshRenderGl(m_pUtilRegistry);
+	m_pMeshRender = new MeshRenderGl(m_pUtilRegistry);
 	m_pOutlineRender = new OutlineRenderGl(m_pMeshRender, m_pShaderLoader);
 	m_pRenderMap = new RenderMapGl(m_pLighting, this, m_pCamera, m_pSkyboxRender, m_pRegistry, m_pUtilRegistry);
 	m_pPrimitiveRender = new PrimitiveRender(m_pShaderLoader, m_pRegistry, m_pRegistry);

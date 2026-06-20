@@ -7,9 +7,11 @@
 #include "lc_client/eng_graphics/entt/components.h"
 #include "lc_client/eng_graphics/opengl/gl_shader_uniform.h"
 #include "lc_client/eng_scene/entt/components.h"
+#include "glm/ext.hpp"
 
 
-PrimitiveRender::PrimitiveRender(ShaderLoaderGl* pShaderLoader, entt::registry* pSceneRegisry, entt::registry* pMapRegistry) {
+PrimitiveRender::PrimitiveRender(
+	ShaderLoaderGl* pShaderLoader, entt::registry* pSceneRegisry, entt::registry* pMapRegistry) {
 	m_pSceneRegistry = pSceneRegisry;
 	m_pMapRegistry = pMapRegistry;
 	m_pShaderLoader = pShaderLoader;
@@ -73,11 +75,11 @@ void PrimitiveRender::init() {
 }
 
 void PrimitiveRender::render(glm::mat4 projection, glm::mat4 view) {
-	 renderLines(projection, view);
-	 renderCubes(projection, view);
+	renderLines(projection, view);
+	renderCubes(projection, view);
 }
 
-void PrimitiveRender::renderLines(glm::mat4 projection, glm::mat4 view) { 
+void PrimitiveRender::renderLines(glm::mat4 projection, glm::mat4 view) {
 	auto lineEntities = m_pSceneRegistry->view<PrimitiveLine>();
 
 	glm::mat4 mvp = projection * view;
@@ -106,10 +108,33 @@ void PrimitiveRender::renderLines(glm::mat4 projection, glm::mat4 view) {
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 		glDrawArrays(GL_LINES, 0, 2);
-		
+
 		glBindVertexArray(0);
 	}
 
+	for (auto&& [entity, linesComponent] : m_pSceneRegistry->view<PrimitiveLines>().each()) {
+		glBindVertexArray(m_lineVao);
+		for (auto& line : linesComponent.lines) {
+			setUniform(m_shader, "color", line.color);
+			// std::cout << glm::to_string(line.startPoint) << " -> " << glm::to_string(line.endPoint) << std::endl;
+			float vertices[] = {
+				line.startPoint.x,
+				line.startPoint.y,
+				line.startPoint.z,
+				line.endPoint.x,
+				line.endPoint.y,
+				line.endPoint.z,
+			};
+
+			glBindBuffer(GL_ARRAY_BUFFER, m_lineVbo);
+			glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+			glDrawArrays(GL_LINES, 0, 2);
+		}
+
+		glBindVertexArray(0);
+	}
 }
 
 void PrimitiveRender::renderCubes(glm::mat4 projection, glm::mat4 view) {
