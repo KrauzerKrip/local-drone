@@ -9,6 +9,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
+#include "game/cable/cable_system.h"
 #include "ldk_client/local_engine/time.h"
 #include "lc_client/eng_graphics/opengl/gl_render.h"
 #include "lc_client/util/eng_resource.h"
@@ -106,8 +107,8 @@ Game::Game(IWindow* pWindow, Tier0* pTier0, std::filesystem::path resourceDir) {
 	m_pControlSystem = new ControlSystem(m_pGraphics->getSettings(), m_pInput, m_pCamera, m_pActionControl, pPhysics,
 		m_pGui->getPointerOverGui(), &m_pWorld->getRegistry());
 
-	m_pGameSystems = new GameSystems(
-		&m_pWorld->getRegistry(), m_pResource, pPhysicalConstants, m_pTier0->getConsole(), m_pTier0->getParameters());
+	m_pGameSystems = new GameSystems(&m_pWorld->getRegistry(), m_pResource, pPhysics, pPhysicalConstants,
+		m_pTier0->getConsole(), m_pTier0->getParameters());
 }
 
 Game::~Game() {
@@ -262,6 +263,38 @@ void Game::init() {
 	connection.rotation = glm::vec3(0, 90, 0);
 	pRegistry->emplace<Connections>(tree).outputs.emplace(ConnectionResourceType::LATEX, connection);
 	pRegistry->emplace<Tree>(tree);
+
+	glm::vec3 cablePos(0, 20, 0);
+	int numberOfSegments = 20;
+	float segmentInterval = 0.25;
+	float particleMass = 0.1;
+
+	Cable cable;
+	CableParticle* pPrevParticle = nullptr;
+	for (int i = 0; i < numberOfSegments; i++) {
+		CableParticle particle{.angularVelocity = glm::vec3(0, 0, 0),
+			.inverseMass = 1 / particleMass,
+			.linearVelocity = glm::vec3(0, 0, 0),
+			.inverseInertia = glm::vec3(0, 0, 0),
+			.rotation = glm::vec3(0, 0, 0),
+			.position = cablePos + glm::vec3(i * segmentInterval, 0, 0)};
+		cable.particles.push_back(particle);
+
+		if (i > 0) {
+			auto& prevParticle = cable.particles[i - 1];
+			size_t i_size_t = static_cast<size_t>(i);
+			CableDistanceConstraint constraint{
+				.indexParticleA = i_size_t - 1,
+				.indexParticleB = i_size_t,
+				.lambda = 0,
+				.restDistance = segmentInterval,
+				.compliance = 0,
+			};
+		}
+	}
+
+	entt::entity cableEntity = pRegistry->create();
+	pRegistry->emplace<Cable>(cableEntity, cable);
 }
 
 void Game::input(double deltaTime) {

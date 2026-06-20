@@ -16,28 +16,35 @@ struct Outline {
 	Outline(glm::vec3 color, float width) : color(color), width(width) {}
 };
 
-struct Water {
+struct Water {};
 
-};
-
-struct Transparent {
-
-};
+struct Transparent {};
 
 struct PrimitiveLine {
 	glm::vec3 startPoint;
 	glm::vec3 endPoint;
-	glm::vec3 color;
+	glm::vec4 color;
 
 	PrimitiveLine(glm::vec3 startPoint, glm::vec3 endPoint, glm::vec3 color)
 		: startPoint(startPoint),
-		  endPoint(endPoint), color(color) {}
+		  endPoint(endPoint),
+		  color(glm::vec4(color.r, color.g, color.b, 1)) {}
+	PrimitiveLine(glm::vec3 startPoint, glm::vec3 endPoint, glm::vec4 color)
+		: startPoint(startPoint),
+		  endPoint(endPoint),
+		  color(color) {}
+};
+
+struct PrimitiveLines {
+	std::vector<PrimitiveLine> lines;
+
+	PrimitiveLines() {};
 };
 
 struct PrimitiveCube {
 	glm::vec4 color;
 
-	explicit PrimitiveCube(glm::vec4 color) : color(color){}
+	explicit PrimitiveCube(glm::vec4 color) : color(color) {}
 };
 
 struct ShaderRequest {
@@ -46,33 +53,29 @@ struct ShaderRequest {
 	std::string fragmentShaderName;
 
 
-	ShaderRequest(
-		std::string packName, std::string vertexShaderName, std::string fragmentShaderName)
+	ShaderRequest(std::string packName, std::string vertexShaderName, std::string fragmentShaderName)
 		: packName(packName),
 		  vertexShaderName(vertexShaderName),
-		  fragmentShaderName(fragmentShaderName)
-	{}
+		  fragmentShaderName(fragmentShaderName) {}
 	ShaderRequest(const ShaderRequest&) = default;
 };
 
 
-struct ShaderReloadRequest {
-
-};
+struct ShaderReloadRequest {};
 
 
-//TODO remove
+// TODO remove
 struct Shader {
 	entt::entity* shader;
 
-    std::unordered_map<std::string, glm::vec4> vectorUniforms;
+	std::unordered_map<std::string, glm::vec4> vectorUniforms;
 	std::unordered_map<std::string, float> floatUniforms;
 
 	Shader() = default;
 	Shader(entt::entity* shader)
 		: shader(shader),
-    vectorUniforms(std::unordered_map<std::string, glm::vec4>()),
-    floatUniforms(std::unordered_map<std::string, float>()){}
+		  vectorUniforms(std::unordered_map<std::string, glm::vec4>()),
+		  floatUniforms(std::unordered_map<std::string, float>()) {}
 	Shader(const Shader&) = default;
 };
 
@@ -101,7 +104,7 @@ struct ShaderGl {
 	unsigned int shaderProgram;
 
 	ShaderGl() = default;
-	ShaderGl(int shaderProgram) : shaderProgram(shaderProgram){};
+	ShaderGl(int shaderProgram) : shaderProgram(shaderProgram) {};
 	ShaderGl(const ShaderGl&) = default;
 };
 
@@ -120,24 +123,24 @@ struct Mesh {
 	Mesh() = default;
 	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, entt::entity& material)
 		: vertices(std::move(vertices)),
-		  indices(std::move(indices)){};
+		  indices(std::move(indices)) {};
 	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, entt::entity& material, int vaoId)
 		: vertices(vertices),
-		  indices(indices){};
-	Mesh(const Mesh& mesh) : vertices(mesh.vertices), indices(mesh.indices){};
+		  indices(indices) {};
+	Mesh(const Mesh& mesh) : vertices(mesh.vertices), indices(mesh.indices) {};
 };
 
 struct VaoGl {
 	unsigned int vaoId;
 
 	VaoGl() = default;
-	VaoGl(const int vaoId) : vaoId(vaoId){};
+	VaoGl(const int vaoId) : vaoId(vaoId) {};
 	VaoGl(const VaoGl&) = default;
 };
 
 struct MaterialSgRequest {
 	std::string materialDir;
-	
+
 	MaterialSgRequest(std::string materialDir) : materialDir(materialDir) {}
 };
 
@@ -156,7 +159,7 @@ struct MaterialMR {
 		: colorTexture(colorTexture),
 		  normalMap(normalMap),
 		  aoTexture(aoTexture),
-		  metallicTexture(metallicTexture){};
+		  metallicTexture(metallicTexture) {};
 	MaterialMR(const MaterialMR&) = default;
 };
 
@@ -174,6 +177,6 @@ struct MaterialSG {
 		  specularTexture(specularTexture),
 		  glossinessTexture(glossinessTexture),
 		  normalMap(normalMap),
-		  aoTexture(aoTexture){};
+		  aoTexture(aoTexture) {};
 	MaterialSG(const MaterialSG&) = default;
 };

@@ -4,6 +4,7 @@
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
 #include <vector>
+#include "lc_client/eng_graphics/entt/components.h"
 #include "lc_client/eng_physics/entt/components.h"
 #include "lc_client/eng_physics/physics.h"
 #include "lc_client/exceptions/component_exception.h"
@@ -22,13 +23,17 @@ void CableSystem::update(double updateInterval) {
 	hits.reserve(8);
 
 	for (auto&& [entity, cable] : m_pRegistry->view<Cable>().each()) {
+		std::vector<bool> particleHadCollision(cable.particles.size(), false);
+		std::vector<glm::vec3> particleCollisionNormal(cable.particles.size(), glm::vec3(0.0f));
 		for (int substep = 0; substep < substeps; substep++) {
 			const float deltaTime = updateInterval / substeps;
+			cable.collisionConstraints.clear();
 
 			for (size_t i = 0; i < cable.particles.size(); i++) {
 				auto& particle = cable.particles[i];
 				particle.prevPosition = particle.position;
 				this->applyExternalForces(particle, deltaTime);
+				hits.clear();
 				SphereOverlapQuery query = {.center = particle.position, .radius = 0.01};
 				m_pPhysics->querySphereOverlaps(query, hits);
 
@@ -38,6 +43,10 @@ void CableSystem::update(double updateInterval) {
 						.c = -hit.penetrationDepth,
 						.lambda = 0.0f,
 						.compliance = 0.0f});
+
+
+					particleHadCollision[i] = true;
+					particleCollisionNormal[i] += hit.normal;
 				}
 			}
 
@@ -46,12 +55,6 @@ void CableSystem::update(double updateInterval) {
 			}
 
 			for (int iter = 0; iter < solverIterations; iter++) {
-				for (CableCollisionConstraint& constraint : cable.collisionConstraints) {
-					glm::vec3 correction = this->calculateCollisionConstraint(cable, constraint, deltaTime);
-					CableParticle& particle = cable.particles[constraint.particleIndex];
-
-					particle.position += particle.inverseMass * correction;
-				}
 				for (CableDistanceConstraint& constraint : cable.constraints) {
 					glm::vec3 correction = this->calculateDistanceConstraint(cable, constraint, deltaTime);
 					auto& particleA = cable.particles[constraint.indexParticleA];
@@ -60,10 +63,49 @@ void CableSystem::update(double updateInterval) {
 
 					particleB.position -= particleB.inverseMass * correction;
 				}
+				for (CableCollisionConstraint& constraint : cable.collisionConstraints) {
+					glm::vec3 correction = this->calculateCollisionConstraint(cable, constraint, deltaTime);
+					CableParticle& particle = cable.particles[constraint.particleIndex];
+					particle.position += particle.inverseMass * correction;
+				}
 			}
 
-			for (CableParticle& particle : cable.particles) {
+			for (size_t i = 0; i < cable.particles.size(); i++) {
+				CableParticle& particle = cable.particles[i];
+
 				particle.linearVelocity = (particle.position - particle.prevPosition) / deltaTime;
+
+				if (particleHadCollision[i]) {
+					glm::vec3 n = glm::normalize(particleCollisionNormal[i]);
+
+					float vn = glm::dot(particle.linearVelocity, n) * 0.95;
+
+					// Remove all normal velocity from contact.
+					// This kills both fake upward bounce and velocity into the collider.
+					particle.linearVelocity -= vn * n;
+
+					// Optional damping/friction
+					particle.linearVelocity *= 0.95f;
+				}
+			}
+		}
+
+		if (m_pRegistry->any_of<PrimitiveLines>(entity)) {
+			auto& lines = m_pRegistry->get<PrimitiveLines>(entity);
+			for (size_t i = 1; i < cable.particles.size(); i++) {
+				auto& particleA = cable.particles[i - 1];
+				auto& particleB = cable.particles[i];
+				lines.lines[i - 1].startPoint = particleA.position;
+				lines.lines[i - 1].endPoint = particleB.position;
+			}
+		}
+		else {
+			auto& lines = m_pRegistry->emplace<PrimitiveLines>(entity);
+			lines.lines.reserve(cable.particles.size());
+			for (size_t i = 1; i < cable.particles.size(); i++) {
+				auto& particleA = cable.particles[i - 1];
+				auto& particleB = cable.particles[i];
+				lines.lines.push_back(PrimitiveLine(particleA.position, particleB.position, glm::vec3(0, 0, 1)));
 			}
 		}
 	}
@@ -128,7 +170,7 @@ glm::vec3 CableSystem::calculateDistanceConstraint(
 	constraint.lambda += deltaLambda;
 
 	const glm::vec3 correction = deltaLambda * normal;
-	return correction;
+	return -correction; // now with "-" sign when the cable is too long, A moves toward B, and B moves toward A.
 }
 
 void CableSystem::applyExternalForces(CableParticle& particle, double deltaTime) {
@@ -136,6 +178,8 @@ void CableSystem::applyExternalForces(CableParticle& particle, double deltaTime)
 		particle.linearVelocity = glm::vec3(0.0f);
 		return;
 	}
-	particle.linearVelocity = glm::vec3(0, -m_gravity * deltaTime, 0);
+	const glm::vec3 gravityAccel(0.0f, -static_cast<float>(m_gravity), 0.0f);
+
+	particle.linearVelocity += gravityAccel * static_cast<float>(deltaTime);
 	particle.position += particle.linearVelocity * static_cast<float>(deltaTime);
 }
