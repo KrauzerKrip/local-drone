@@ -1,11 +1,18 @@
 #pragma once
 
-#include <iostream>
-
 #include <entt/entt.hpp>
+#include <optional>
 
+#include "lc_client/eng_physics/entt/components.h"
 #include "raycast/ray.h"
+#include "collision/sphere.h"
 
+struct CollisionHit {
+	entt::entity entity;
+	glm::vec3 normal;
+	glm::vec3 point;
+	float penetrationDepth;
+};
 
 class Physics {
 public:
@@ -13,6 +20,9 @@ public:
 
 	template <typename... Components, typename... Exclude>
 	RaycastResult raycast(RaycastQuery query, entt::exclude_t<Exclude...> exclude = entt::exclude_t{});
+	template <typename... Components, typename... Exclude>
+	void querySphereOverlaps(const SphereOverlapQuery& collider, std::vector<CollisionHit>& outHits,
+		entt::exclude_t<Exclude...> exclude = entt::exclude_t{});
 
 private:
 	template <typename... Components, typename... Exclude>
@@ -23,6 +33,32 @@ private:
 
 	entt::registry* m_pRegistry = nullptr;
 };
+
+template <typename... Components, typename... Exclude>
+void Physics::querySphereOverlaps(
+	const SphereOverlapQuery& query, std::vector<CollisionHit>& outHits, entt::exclude_t<Exclude...> exclude) {
+	outHits.clear();
+
+	auto entities = m_pRegistry->view<Colliders, Transform, Components...>(exclude);
+
+	Sphere sphere(query.center, query.radius);
+
+	for (auto&& [entity, colliders, transform] : entities) {
+		for (auto&& [colliderEnt, colliderType] : colliders.colliders) {
+			if (colliderType == ColliderType::BOX) {
+				Transform& colliderTransform = m_pRegistry->get<Transform>(colliderEnt);
+				std::optional<SphereCollisionHit> maybeHit = sphere.getOverlapWithOBB(colliderTransform);
+				if (maybeHit) {
+					auto hit = *maybeHit;
+					outHits.push_back(CollisionHit{.entity = entity,
+						.normal = hit.normal,
+						.point = hit.point,
+						.penetrationDepth = hit.penetrationDepth});
+				}
+			}
+		}
+	}
+}
 
 template <typename... Components, typename... Exclude>
 RaycastResult Physics::raycast(RaycastQuery query, entt::exclude_t<Exclude...> exclude) {
