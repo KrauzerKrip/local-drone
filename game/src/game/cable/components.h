@@ -36,7 +36,8 @@ struct CableDistanceConstraint {
 struct CableCollisionConstraint {
 	size_t particleIndex;
 	glm::vec3 normal;
-	float c;
+	glm::vec3 point;
+	float particleRadius;
 	float lambda;
 	float compliance;
 };

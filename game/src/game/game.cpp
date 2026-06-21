@@ -264,9 +264,9 @@ void Game::init() {
 	pRegistry->emplace<Connections>(tree).outputs.emplace(ConnectionResourceType::LATEX, connection);
 	pRegistry->emplace<Tree>(tree);
 
-	glm::vec3 cablePos(0, 20, 0);
-	int numberOfSegments = 20;
-	float segmentInterval = 0.25;
+	glm::vec3 cablePos(5, 20, 0);
+	int numberOfSegments = 5;
+	float segmentInterval = 1;
 	float particleMass = 0.1;
 
 	Cable cable;
@@ -288,8 +288,10 @@ void Game::init() {
 				.indexParticleB = i_size_t,
 				.lambda = 0,
 				.restDistance = segmentInterval,
-				.compliance = 0,
+				.compliance = 0.0f,
 			};
+
+			cable.constraints.push_back(constraint);
 		}
 	}
 

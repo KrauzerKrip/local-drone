@@ -1,4 +1,5 @@
 #include "cable_system.h"
+#include <algorithm>
 #include <entt/entity/fwd.hpp>
 #include <glm/ext/quaternion_geometric.hpp>
 #include <glm/fwd.hpp>
@@ -21,33 +22,22 @@ void CableSystem::update(double updateInterval) {
 
 	std::vector<CollisionHit> hits;
 	hits.reserve(8);
+	constexpr float particleRadius = 0.01f;
 
 	for (auto&& [entity, cable] : m_pRegistry->view<Cable>().each()) {
 		std::vector<bool> particleHadCollision(cable.particles.size(), false);
 		std::vector<glm::vec3> particleCollisionNormal(cable.particles.size(), glm::vec3(0.0f));
 		for (int substep = 0; substep < substeps; substep++) {
 			const float deltaTime = updateInterval / substeps;
-			cable.collisionConstraints.clear();
+			std::fill(particleHadCollision.begin(), particleHadCollision.end(), false);
+			std::fill(particleCollisionNormal.begin(), particleCollisionNormal.end(), glm::vec3(0.0f));
 
-			for (size_t i = 0; i < cable.particles.size(); i++) {
-				auto& particle = cable.particles[i];
+			for (CableParticle& particle : cable.particles) {
 				particle.prevPosition = particle.position;
-				this->applyExternalForces(particle, deltaTime);
-				hits.clear();
-				SphereOverlapQuery query = {.center = particle.position, .radius = 0.01};
-				m_pPhysics->querySphereOverlaps(query, hits);
-
-				for (const CollisionHit& hit : hits) {
-					cable.collisionConstraints.push_back({.particleIndex = i,
-						.normal = hit.normal,
-						.c = -hit.penetrationDepth,
-						.lambda = 0.0f,
-						.compliance = 0.0f});
-
-
-					particleHadCollision[i] = true;
-					particleCollisionNormal[i] += hit.normal;
+				if (particle.inverseMass == 0.0f) {
+					continue;
 				}
+				this->applyExternalForces(particle, deltaTime);
 			}
 
 			for (CableDistanceConstraint& constraint : cable.constraints) {
@@ -55,14 +45,36 @@ void CableSystem::update(double updateInterval) {
 			}
 
 			for (int iter = 0; iter < solverIterations; iter++) {
+				// Distance constraints
 				for (CableDistanceConstraint& constraint : cable.constraints) {
 					glm::vec3 correction = this->calculateDistanceConstraint(cable, constraint, deltaTime);
 					auto& particleA = cable.particles[constraint.indexParticleA];
 					auto& particleB = cable.particles[constraint.indexParticleB];
 					particleA.position += particleA.inverseMass * correction;
-
 					particleB.position -= particleB.inverseMass * correction;
 				}
+
+				// Collision constraints
+				cable.collisionConstraints.clear();
+
+				for (size_t i = 0; i < cable.particles.size(); i++) {
+					hits.clear();
+					auto& particle = cable.particles[i];
+					SphereOverlapQuery query = {.center = particle.position, .radius = particleRadius};
+					m_pPhysics->querySphereOverlaps(query, hits);
+					for (const CollisionHit& hit : hits) {
+						cable.collisionConstraints.push_back({.particleIndex = i,
+							.normal = hit.normal,
+							.point = hit.point,
+							.particleRadius = particleRadius,
+							.lambda = 0.0f,
+							.compliance = 0.0f});
+
+						particleHadCollision[i] = true;
+						particleCollisionNormal[i] += hit.normal;
+					}
+				}
+
 				for (CableCollisionConstraint& constraint : cable.collisionConstraints) {
 					glm::vec3 correction = this->calculateCollisionConstraint(cable, constraint, deltaTime);
 					CableParticle& particle = cable.particles[constraint.particleIndex];
@@ -70,21 +82,21 @@ void CableSystem::update(double updateInterval) {
 				}
 			}
 
+			// Update velocities from final corrected positions
 			for (size_t i = 0; i < cable.particles.size(); i++) {
 				CableParticle& particle = cable.particles[i];
-
+				if (particle.inverseMass == 0.0f) {
+					continue;
+				}
 				particle.linearVelocity = (particle.position - particle.prevPosition) / deltaTime;
-
-				if (particleHadCollision[i]) {
+				if (particleHadCollision[i] &&
+					glm::dot(particleCollisionNormal[i], particleCollisionNormal[i]) > 0.0f) {
 					glm::vec3 n = glm::normalize(particleCollisionNormal[i]);
-
-					float vn = glm::dot(particle.linearVelocity, n) * 0.95;
-
-					// Remove all normal velocity from contact.
-					// This kills both fake upward bounce and velocity into the collider.
-					particle.linearVelocity -= vn * n;
-
-					// Optional damping/friction
+					float vn = glm::dot(particle.linearVelocity, n);
+					if (vn < 0.0f) {
+						particle.linearVelocity -= vn * n;
+					}
+					// crude damping/friction
 					particle.linearVelocity *= 0.95f;
 				}
 			}
@@ -123,7 +135,8 @@ void CableSystem::connectWithCable(entt::entity anchor, entt::entity attachment)
 glm::vec3 CableSystem::calculateCollisionConstraint(
 	Cable& cable, CableCollisionConstraint& constraint, double deltaTime) {
 	auto& particle = cable.particles[constraint.particleIndex];
-	if (constraint.c >= 0.0f) {
+	const float c = glm::dot(particle.position - constraint.point, constraint.normal) - constraint.particleRadius;
+	if (c >= 0.0f) {
 		return glm::vec3(0.0f);
 	}
 	if (particle.inverseMass == 0.0f) {
@@ -138,7 +151,7 @@ glm::vec3 CableSystem::calculateCollisionConstraint(
 		return glm::vec3(0.0f);
 	}
 
-	float deltaLambda = (-constraint.c - alpha * constraint.lambda) / denominator;
+	float deltaLambda = (-c - alpha * constraint.lambda) / denominator;
 	const float oldLambda = constraint.lambda;
 
 	// lambda must stay >= 0, because contact can push but cannot pull.
