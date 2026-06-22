@@ -9,6 +9,7 @@
 #include "lc_client/eng_physics/entt/components.h"
 #include "lc_client/eng_physics/physics.h"
 #include "lc_client/exceptions/component_exception.h"
+#include <limits>
 
 CableSystem::CableSystem(Physics* pPhysics, entt::registry* pRegistry) {
 	m_pPhysics = pPhysics;
@@ -17,8 +18,8 @@ CableSystem::CableSystem(Physics* pPhysics, entt::registry* pRegistry) {
 }
 
 void CableSystem::update(double updateInterval) {
-	const int substeps = 20;
-	const int solverIterations = 5;
+	const int substeps = 10;
+	const int solverIterations = 3;
 
 	std::vector<CollisionHit> hits;
 	hits.reserve(8);
@@ -44,6 +45,14 @@ void CableSystem::update(double updateInterval) {
 				constraint.lambda = 0.0f;
 			}
 
+			const float collisionMargin = 0.25f;
+			CableBounds cableBounds = computeCableBounds(cable);
+			cableBounds.size += glm::vec3(particleRadius + collisionMargin);
+
+			cable.colliderCandidates.clear();
+			m_pPhysics->queryAABBOverlaps(
+				AABBOverlapQuery{.position = cableBounds.position, .size = cableBounds.size}, cable.colliderCandidates);
+
 			for (int iter = 0; iter < solverIterations; iter++) {
 				// Distance constraints
 				for (CableDistanceConstraint& constraint : cable.constraints) {
@@ -61,17 +70,21 @@ void CableSystem::update(double updateInterval) {
 					hits.clear();
 					auto& particle = cable.particles[i];
 					SphereOverlapQuery query = {.center = particle.position, .radius = particleRadius};
-					m_pPhysics->querySphereOverlaps(query, hits);
-					for (const CollisionHit& hit : hits) {
-						cable.collisionConstraints.push_back({.particleIndex = i,
-							.normal = hit.normal,
-							.point = hit.point,
-							.particleRadius = particleRadius,
-							.lambda = 0.0f,
-							.compliance = 0.0f});
+					for (CollisionHit& cableCandidate : cable.colliderCandidates) {
+						auto maybeCollisionHit = m_pPhysics->sphereIntersect(
+							query, cableCandidate.ownerEntity, cableCandidate.colliderEntity);
+						if (maybeCollisionHit) {
+							CollisionHit hit = *maybeCollisionHit;
+							cable.collisionConstraints.push_back({.particleIndex = i,
+								.normal = hit.normal,
+								.point = hit.point,
+								.particleRadius = particleRadius,
+								.lambda = 0.0f,
+								.compliance = 0.0f});
 
-						particleHadCollision[i] = true;
-						particleCollisionNormal[i] += hit.normal;
+							particleHadCollision[i] = true;
+							particleCollisionNormal[i] += hit.normal;
+						}
 					}
 				}
 
@@ -195,4 +208,33 @@ void CableSystem::applyExternalForces(CableParticle& particle, double deltaTime)
 
 	particle.linearVelocity += gravityAccel * static_cast<float>(deltaTime);
 	particle.position += particle.linearVelocity * static_cast<float>(deltaTime);
+}
+
+CableBounds CableSystem::computeCableBounds(const Cable& cable) {
+	if (cable.particles.empty()) {
+		return CableBounds{.position = glm::vec3(0.0f), .size = glm::vec3(0.0f)};
+	}
+	glm::vec3 min(std::numeric_limits<float>::infinity());
+	glm::vec3 max(-std::numeric_limits<float>::infinity());
+
+	for (const CableParticle& particle : cable.particles) {
+		auto& pos = particle.position;
+
+		for (const CableParticle& particle : cable.particles) {
+			const glm::vec3& pos = particle.position;
+
+			min.x = std::min(min.x, pos.x);
+			min.y = std::min(min.y, pos.y);
+			min.z = std::min(min.z, pos.z);
+
+			max.x = std::max(max.x, pos.x);
+			max.y = std::max(max.y, pos.y);
+			max.z = std::max(max.z, pos.z);
+		}
+	}
+
+	glm::vec3 center = (min + max) * 0.5f;
+	glm::vec3 size = max - min;
+
+	return CableBounds{.position = center, .size = size};
 }

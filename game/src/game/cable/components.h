@@ -1,8 +1,9 @@
+#include "lc_client/eng_physics/physics.h"
 #include <cstddef>
 #include <glm/vec3.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <vector>
-
+#include <entt/entt.hpp>
 
 struct CableAnchor {};
 
@@ -47,4 +48,6 @@ struct Cable {
 	std::vector<CableParticle> particles;
 	std::vector<CableDistanceConstraint> constraints;
 	std::vector<CableCollisionConstraint> collisionConstraints;
+
+	std::vector<CollisionHit> colliderCandidates;
 };
