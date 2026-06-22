@@ -265,7 +265,7 @@ void Game::init() {
 	pRegistry->emplace<Tree>(tree);
 
 	glm::vec3 cablePos(5, 20, 0);
-	int numberOfSegments = 5;
+	int numberOfSegments = 30;
 	float segmentInterval = 1;
 	float particleMass = 0.1;
 

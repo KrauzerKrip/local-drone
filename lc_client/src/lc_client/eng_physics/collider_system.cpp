@@ -1,16 +1,16 @@
 #include "collider_system.h"
 
 #include "entt/components.h"
-#include "lc_client/eng_scene/entt/components.h" 
+#include "lc_client/eng_scene/entt/components.h"
 #include <glm/gtx/string_cast.hpp>
 
 
 
 ColliderSystem::ColliderSystem(entt::registry* pRegistry) { m_pRegistry = pRegistry; }
 
-void ColliderSystem::update() { 
+void ColliderSystem::update() {
 	auto colliderOwnersEntities = m_pRegistry->view<Colliders, Transform>();
-	
+
 	for (auto&& [entity, colliders, ownerTransform] : colliderOwnersEntities.each()) {
 		for (auto&& [ent, type] : colliders.colliders) {
 			Transform& transform = m_pRegistry->get<Transform>(ent);

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <vector>
 #include <optional>
 #include <string>
@@ -27,6 +28,11 @@ struct BoxCollider {};
 struct SphereOverlapQuery {
 	glm::vec3 center;
 	float radius;
+};
+
+struct AABBOverlapQuery {
+	glm::vec3 position;
+	glm::vec3 size;
 };
 
 
