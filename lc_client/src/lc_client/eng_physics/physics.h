@@ -8,12 +8,14 @@
 #include <vector>
 
 #include "lc_client/eng_physics/entt/components.h"
+#include "lc_client/eng_scene/entt/components.h"
 #include "raycast/ray.h"
 #include "collision/sphere.h"
 
 struct CollisionHit {
 	entt::entity ownerEntity;
 	entt::entity colliderEntity;
+	ColliderType colliderType;
 
 	glm::vec3 normal;
 	glm::vec3 point;
@@ -34,6 +36,22 @@ public:
 		entt::exclude_t<Exclude...> exclude = entt::exclude_t{});
 	std::optional<CollisionHit> sphereIntersect(
 		const SphereOverlapQuery& sphereQuery, entt::entity ownerEntity, entt::entity colliderEntity);
+	/**
+	 * @brief Computes contact between a sphere and a single collider.
+	 *
+	 * This function performs no ECS lookups.
+	 * It only fills geometric contact fields:
+	 * - normal
+	 * - point
+	 * - penetrationDepth
+	 *
+	 * The caller is responsible for filling:
+	 * - ownerEntity
+	 * - colliderEntity
+	 * - colliderType
+	 */
+	bool sphereIntersectCollider(const Sphere& sphere, ColliderType colliderType, const Transform& colliderTransform,
+		CollisionHit& outHit) const;
 
 private:
 	template <typename... Components, typename... Exclude>
@@ -160,11 +178,14 @@ void Physics::queryAABBOverlaps(
 				point += colliderAxes[dimension] * localPoint;
 			}
 
-			outHits.push_back(CollisionHit{.ownerEntity = entity,
+			outHits.push_back(CollisionHit{
+				.ownerEntity = entity,
 				.colliderEntity = colliderEnt,
+				.colliderType = colliderType,
 				.normal = collisionNormal,
 				.point = point,
-				.penetrationDepth = minimumPenetration});
+				.penetrationDepth = minimumPenetration,
+			});
 		}
 	}
 }

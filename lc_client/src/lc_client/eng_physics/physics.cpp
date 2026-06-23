@@ -1,5 +1,6 @@
 #include "physics.h"
 
+#include "lc_client/eng_physics/entt/components.h"
 #include "lc_client/eng_scene/entt/components.h"
 #include <glm/glm.hpp>
 
@@ -21,10 +22,31 @@ std::optional<CollisionHit> Physics::sphereIntersect(
 	return CollisionHit{
 		.ownerEntity = ownerEntity,
 		.colliderEntity = colliderEntity,
+		.colliderType = ColliderType::BOX,
 		.normal = sphereHit->normal,
 		.point = sphereHit->point,
 		.penetrationDepth = sphereHit->penetrationDepth,
 	};
+}
+
+bool Physics::sphereIntersectCollider(
+	const Sphere& sphere, ColliderType colliderType, const Transform& colliderTransform, CollisionHit& outHit) const {
+	switch (colliderType) {
+	case ColliderType::BOX: {
+		const auto maybeHit = sphere.getOverlapWithOBB(colliderTransform);
+		if (maybeHit) {
+			SphereCollisionHit sphereHit = *maybeHit;
+			outHit.normal = sphereHit.normal;
+			outHit.point = sphereHit.point;
+			outHit.penetrationDepth = sphereHit.penetrationDepth;
+			return true;
+		}
+		return false;
+	}
+
+	default:
+		return false;
+	}
 }
 
 

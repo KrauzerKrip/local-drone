@@ -43,11 +43,18 @@ struct CableCollisionConstraint {
 	float compliance;
 };
 
+struct CableColliderCandidate {
+	entt::entity ownerEntity = entt::null;
+	entt::entity colliderEntity = entt::null;
+	ColliderType colliderType;
+	Transform colliderTransform;
+};
+
 struct Cable {
 	// cache friendly data allocation
 	std::vector<CableParticle> particles;
 	std::vector<CableDistanceConstraint> constraints;
 	std::vector<CableCollisionConstraint> collisionConstraints;
 
-	std::vector<CollisionHit> colliderCandidates;
+	std::vector<CableColliderCandidate> colliderCandidates;
 };
