@@ -6,10 +6,18 @@
 #include <glm/geometric.hpp>
 #include <vector>
 #include "lc_client/eng_graphics/entt/components.h"
+#include "lc_client/eng_physics/collision/sphere.h"
 #include "lc_client/eng_physics/entt/components.h"
 #include "lc_client/eng_physics/physics.h"
 #include "lc_client/exceptions/component_exception.h"
 #include <limits>
+#include "lc_client/eng_physics/collision/sphere.h"
+
+#if defined(TRACY_ENABLE)
+#include <tracy/Tracy.hpp>
+#else
+#define ZoneScopedN(name)
+#endif
 
 CableSystem::CableSystem(Physics* pPhysics, entt::registry* pRegistry) {
 	m_pPhysics = pPhysics;
@@ -18,119 +26,182 @@ CableSystem::CableSystem(Physics* pPhysics, entt::registry* pRegistry) {
 }
 
 void CableSystem::update(double updateInterval) {
+	ZoneScopedN("CableSystem::update");
+
 	const int substeps = 10;
 	const int solverIterations = 3;
 
 	std::vector<CollisionHit> hits;
+	std::vector<CollisionHit> cableColliderHits;
 	hits.reserve(8);
+	cableColliderHits.reserve(16);
 	constexpr float particleRadius = 0.01f;
 
 	for (auto&& [entity, cable] : m_pRegistry->view<Cable>().each()) {
+		ZoneScopedN("CableSystem::update cable");
+
 		std::vector<bool> particleHadCollision(cable.particles.size(), false);
 		std::vector<glm::vec3> particleCollisionNormal(cable.particles.size(), glm::vec3(0.0f));
 		for (int substep = 0; substep < substeps; substep++) {
+			ZoneScopedN("CableSystem::substep");
+
 			const float deltaTime = updateInterval / substeps;
 			std::fill(particleHadCollision.begin(), particleHadCollision.end(), false);
 			std::fill(particleCollisionNormal.begin(), particleCollisionNormal.end(), glm::vec3(0.0f));
 
-			for (CableParticle& particle : cable.particles) {
-				particle.prevPosition = particle.position;
-				if (particle.inverseMass == 0.0f) {
-					continue;
+			{
+				ZoneScopedN("CableSystem::apply external forces");
+
+				for (CableParticle& particle : cable.particles) {
+					particle.prevPosition = particle.position;
+					if (particle.inverseMass == 0.0f) {
+						continue;
+					}
+					this->applyExternalForces(particle, deltaTime);
 				}
-				this->applyExternalForces(particle, deltaTime);
 			}
 
-			for (CableDistanceConstraint& constraint : cable.constraints) {
-				constraint.lambda = 0.0f;
+			{
+				ZoneScopedN("CableSystem::reset distance lambdas");
+
+				for (CableDistanceConstraint& constraint : cable.constraints) {
+					constraint.lambda = 0.0f;
+				}
 			}
 
 			const float collisionMargin = 0.25f;
-			CableBounds cableBounds = computeCableBounds(cable);
+			CableBounds cableBounds;
+			{
+				ZoneScopedN("CableSystem::compute bounds");
+
+				cableBounds = computeCableBounds(cable);
+			}
 			cableBounds.size += glm::vec3(particleRadius + collisionMargin);
 
-			cable.colliderCandidates.clear();
-			m_pPhysics->queryAABBOverlaps(
-				AABBOverlapQuery{.position = cableBounds.position, .size = cableBounds.size}, cable.colliderCandidates);
+			{
+				ZoneScopedN("CableSystem::physics AABB overlap query");
+
+				cableColliderHits.clear();
+				m_pPhysics->queryAABBOverlaps(
+					AABBOverlapQuery{.position = cableBounds.position, .size = cableBounds.size}, cableColliderHits);
+			}
+			{
+				ZoneScopedN("CableSystem::map collider candidates");
+				cable.colliderCandidates.clear();
+				cable.colliderCandidates.reserve(cableColliderHits.size());
+
+				for (const CollisionHit& hit : cableColliderHits) {
+					// if (containsCandidate(cable.colliderCandidates, hit.colliderEntity)) {
+					// 	continue;
+					// }
+
+					const Transform& colliderTransform = m_pRegistry->get<Transform>(hit.colliderEntity);
+
+					cable.colliderCandidates.push_back(CableColliderCandidate{.ownerEntity = hit.ownerEntity,
+						.colliderEntity = hit.colliderEntity,
+						.colliderType = hit.colliderType,
+						.colliderTransform = colliderTransform});
+				}
+			}
 
 			for (int iter = 0; iter < solverIterations; iter++) {
-				// Distance constraints
-				for (CableDistanceConstraint& constraint : cable.constraints) {
-					glm::vec3 correction = this->calculateDistanceConstraint(cable, constraint, deltaTime);
-					auto& particleA = cable.particles[constraint.indexParticleA];
-					auto& particleB = cable.particles[constraint.indexParticleB];
-					particleA.position += particleA.inverseMass * correction;
-					particleB.position -= particleB.inverseMass * correction;
+				ZoneScopedN("CableSystem::solver iteration");
+
+				{
+					ZoneScopedN("CableSystem::solve distance constraints");
+
+					for (CableDistanceConstraint& constraint : cable.constraints) {
+						glm::vec3 correction = this->calculateDistanceConstraint(cable, constraint, deltaTime);
+						auto& particleA = cable.particles[constraint.indexParticleA];
+						auto& particleB = cable.particles[constraint.indexParticleB];
+						particleA.position += particleA.inverseMass * correction;
+						particleB.position -= particleB.inverseMass * correction;
+					}
 				}
 
-				// Collision constraints
-				cable.collisionConstraints.clear();
+				{
+					ZoneScopedN("CableSystem::build collision constraints");
 
-				for (size_t i = 0; i < cable.particles.size(); i++) {
-					hits.clear();
-					auto& particle = cable.particles[i];
-					SphereOverlapQuery query = {.center = particle.position, .radius = particleRadius};
-					for (CollisionHit& cableCandidate : cable.colliderCandidates) {
-						auto maybeCollisionHit = m_pPhysics->sphereIntersect(
-							query, cableCandidate.ownerEntity, cableCandidate.colliderEntity);
-						if (maybeCollisionHit) {
-							CollisionHit hit = *maybeCollisionHit;
-							cable.collisionConstraints.push_back({.particleIndex = i,
-								.normal = hit.normal,
-								.point = hit.point,
-								.particleRadius = particleRadius,
-								.lambda = 0.0f,
-								.compliance = 0.0f});
+					cable.collisionConstraints.clear();
 
-							particleHadCollision[i] = true;
-							particleCollisionNormal[i] += hit.normal;
+					for (size_t i = 0; i < cable.particles.size(); i++) {
+						hits.clear();
+						auto& particle = cable.particles[i];
+						Sphere sphere(particle.position, particleRadius);
+						for (CableColliderCandidate& cableCandidate : cable.colliderCandidates) {
+							ZoneScopedN("CableSystem::physics sphere intersect");
+							CollisionHit hit;
+							bool result = m_pPhysics->sphereIntersectCollider(
+								sphere, cableCandidate.colliderType, cableCandidate.colliderTransform, hit);
+							if (result) {
+								cable.collisionConstraints.push_back({.particleIndex = i,
+									.normal = hit.normal,
+									.point = hit.point,
+									.particleRadius = particleRadius,
+									.lambda = 0.0f,
+									.compliance = 0.0f});
+
+								particleHadCollision[i] = true;
+								particleCollisionNormal[i] += hit.normal;
+							}
 						}
 					}
 				}
 
-				for (CableCollisionConstraint& constraint : cable.collisionConstraints) {
-					glm::vec3 correction = this->calculateCollisionConstraint(cable, constraint, deltaTime);
-					CableParticle& particle = cable.particles[constraint.particleIndex];
-					particle.position += particle.inverseMass * correction;
-				}
-			}
+				{
+					ZoneScopedN("CableSystem::solve collision constraints");
 
-			// Update velocities from final corrected positions
-			for (size_t i = 0; i < cable.particles.size(); i++) {
-				CableParticle& particle = cable.particles[i];
-				if (particle.inverseMass == 0.0f) {
-					continue;
-				}
-				particle.linearVelocity = (particle.position - particle.prevPosition) / deltaTime;
-				if (particleHadCollision[i] &&
-					glm::dot(particleCollisionNormal[i], particleCollisionNormal[i]) > 0.0f) {
-					glm::vec3 n = glm::normalize(particleCollisionNormal[i]);
-					float vn = glm::dot(particle.linearVelocity, n);
-					if (vn < 0.0f) {
-						particle.linearVelocity -= vn * n;
+					for (CableCollisionConstraint& constraint : cable.collisionConstraints) {
+						glm::vec3 correction = this->calculateCollisionConstraint(cable, constraint, deltaTime);
+						CableParticle& particle = cable.particles[constraint.particleIndex];
+						particle.position += particle.inverseMass * correction;
 					}
-					// crude damping/friction
-					particle.linearVelocity *= 0.95f;
+				}
+			}
+
+			{
+				ZoneScopedN("CableSystem::update velocities");
+
+				for (size_t i = 0; i < cable.particles.size(); i++) {
+					CableParticle& particle = cable.particles[i];
+					if (particle.inverseMass == 0.0f) {
+						continue;
+					}
+					particle.linearVelocity = (particle.position - particle.prevPosition) / deltaTime;
+					if (particleHadCollision[i] &&
+						glm::dot(particleCollisionNormal[i], particleCollisionNormal[i]) > 0.0f) {
+						glm::vec3 n = glm::normalize(particleCollisionNormal[i]);
+						float vn = glm::dot(particle.linearVelocity, n);
+						if (vn < 0.0f) {
+							particle.linearVelocity -= vn * n;
+						}
+						// crude damping/friction
+						particle.linearVelocity *= 0.95f;
+					}
 				}
 			}
 		}
 
-		if (m_pRegistry->any_of<PrimitiveLines>(entity)) {
-			auto& lines = m_pRegistry->get<PrimitiveLines>(entity);
-			for (size_t i = 1; i < cable.particles.size(); i++) {
-				auto& particleA = cable.particles[i - 1];
-				auto& particleB = cable.particles[i];
-				lines.lines[i - 1].startPoint = particleA.position;
-				lines.lines[i - 1].endPoint = particleB.position;
+		{
+			ZoneScopedN("CableSystem::sync primitive lines");
+
+			if (m_pRegistry->any_of<PrimitiveLines>(entity)) {
+				auto& lines = m_pRegistry->get<PrimitiveLines>(entity);
+				for (size_t i = 1; i < cable.particles.size(); i++) {
+					auto& particleA = cable.particles[i - 1];
+					auto& particleB = cable.particles[i];
+					lines.lines[i - 1].startPoint = particleA.position;
+					lines.lines[i - 1].endPoint = particleB.position;
+				}
 			}
-		}
-		else {
-			auto& lines = m_pRegistry->emplace<PrimitiveLines>(entity);
-			lines.lines.reserve(cable.particles.size());
-			for (size_t i = 1; i < cable.particles.size(); i++) {
-				auto& particleA = cable.particles[i - 1];
-				auto& particleB = cable.particles[i];
-				lines.lines.push_back(PrimitiveLine(particleA.position, particleB.position, glm::vec3(0, 0, 1)));
+			else {
+				auto& lines = m_pRegistry->emplace<PrimitiveLines>(entity);
+				lines.lines.reserve(cable.particles.size());
+				for (size_t i = 1; i < cable.particles.size(); i++) {
+					auto& particleA = cable.particles[i - 1];
+					auto& particleB = cable.particles[i];
+					lines.lines.push_back(PrimitiveLine(particleA.position, particleB.position, glm::vec3(0, 0, 1)));
+				}
 			}
 		}
 	}

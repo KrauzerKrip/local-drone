@@ -14,10 +14,10 @@ class Sphere {
 public:
 	Sphere(glm::vec3 center, float radius);
 
-	std::optional<SphereCollisionHit> getOverlapWithOBB(const Transform& boxTransform);
+	std::optional<SphereCollisionHit> getOverlapWithOBB(const Transform& boxTransform) const;
 
 private:
-	glm::vec3 getClosestPointOnOBB(const Transform& boxTransform);
+	glm::vec3 getClosestPointOnOBB(const Transform& boxTransform) const;
 
 	glm::vec3 m_center;
 	float m_radius;

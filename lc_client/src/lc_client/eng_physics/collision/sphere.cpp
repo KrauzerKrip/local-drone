@@ -10,7 +10,7 @@
 Sphere::Sphere(glm::vec3 center, float radius) : m_center(center), m_radius(radius) {}
 
 
-std::optional<SphereCollisionHit> Sphere::getOverlapWithOBB(const Transform& boxTransform) {
+std::optional<SphereCollisionHit> Sphere::getOverlapWithOBB(const Transform& boxTransform) const {
 	glm::vec3 closestPoint = getClosestPointOnOBB(boxTransform);
 	glm::vec3 fromBoxToSphere = m_center - closestPoint;
 
@@ -55,7 +55,7 @@ std::optional<SphereCollisionHit> Sphere::getOverlapWithOBB(const Transform& box
 	return SphereCollisionHit{.point = closestPoint, .normal = normal, .penetrationDepth = penetrationDepth};
 }
 
-glm::vec3 Sphere::getClosestPointOnOBB(const Transform& boxTransform) {
+glm::vec3 Sphere::getClosestPointOnOBB(const Transform& boxTransform) const {
 	glm::vec3 distanceVec = m_center - boxTransform.position;
 	glm::vec3 closesPoint = boxTransform.position;
 
