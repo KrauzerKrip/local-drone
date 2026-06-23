@@ -23,5 +23,7 @@ target_sources(
           "physics_loader.cpp"
           "collider_system.h"
           "collider_system.cpp"
+          "collision/aabb.h"
+          "collision/aabb.cpp"
           "collision/sphere.h"
           "collision/sphere.cpp")

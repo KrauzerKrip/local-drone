@@ -1,18 +1,17 @@
 #include "cable_system.h"
 #include <algorithm>
 #include <entt/entity/fwd.hpp>
-#include <execution>
 #include <glm/ext/quaternion_geometric.hpp>
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
 #include <vector>
 #include "lc_client/eng_graphics/entt/components.h"
+#include "lc_client/eng_physics/collision/aabb.h"
 #include "lc_client/eng_physics/collision/sphere.h"
 #include "lc_client/eng_physics/entt/components.h"
 #include "lc_client/eng_physics/physics.h"
 #include "lc_client/exceptions/component_exception.h"
 #include <limits>
-#include "lc_client/eng_physics/collision/sphere.h"
 
 #if defined(TRACY_ENABLE)
 #include <tracy/Tracy.hpp>
@@ -21,6 +20,12 @@
 #endif
 
 namespace {
+	bool containsCandidate(const std::vector<CableColliderCandidate>& candidates, entt::entity colliderEntity) {
+		return std::any_of(candidates.begin(), candidates.end(), [colliderEntity](const CableColliderCandidate& candidate) {
+			return candidate.colliderEntity == colliderEntity;
+		});
+	}
+
 	std::vector<std::vector<size_t>> colorConstraints(const Cable& cable) {
 		std::vector<std::vector<size_t>> colors;
 		std::vector<std::vector<bool>> colorUsesParticle;
@@ -72,9 +77,7 @@ void CableSystem::update(double updateInterval) {
 	const int substeps = 10;
 	const int solverIterations = 3;
 
-	std::vector<CollisionHit> hits;
 	std::vector<CollisionHit> cableColliderHits;
-	hits.reserve(8);
 	cableColliderHits.reserve(16);
 	constexpr float particleRadius = 0.01f;
 
@@ -83,8 +86,16 @@ void CableSystem::update(double updateInterval) {
 
 		updateColoredConstraints(cable);
 
-		std::vector<bool> particleHadCollision(cable.particles.size(), false);
-		std::vector<glm::vec3> particleCollisionNormal(cable.particles.size(), glm::vec3(0.0f));
+		// std::cout << "particles: " << cable.particles.size() << std::endl;
+		// std::cout << "constraints: " << cable.constraints.size() << std::endl;
+		// std::cout << "coloredConstraints: " << cable.coloredConstraints.size() << std::endl;
+		// std::cout << "collisionConstraints: " << cable.collisionConstraints.size() << std::endl;
+		// std::cout << "colliderCandidates: " << cable.colliderCandidates.size() << std::endl;
+
+		cable.particleHadCollisionScratch.resize(cable.particles.size());
+		cable.particleCollisionNormalScratch.resize(cable.particles.size());
+		auto& particleHadCollision = cable.particleHadCollisionScratch;
+		auto& particleCollisionNormal = cable.particleCollisionNormalScratch;
 		for (int substep = 0; substep < substeps; substep++) {
 			ZoneScopedN("CableSystem::substep");
 
@@ -134,9 +145,9 @@ void CableSystem::update(double updateInterval) {
 				cable.colliderCandidates.reserve(cableColliderHits.size());
 
 				for (const CollisionHit& hit : cableColliderHits) {
-					// if (containsCandidate(cable.colliderCandidates, hit.colliderEntity)) {
-					// 	continue;
-					// }
+					if (containsCandidate(cable.colliderCandidates, hit.colliderEntity)) {
+						continue;
+					}
 
 					const Transform& colliderTransform = m_pRegistry->get<Transform>(hit.colliderEntity);
 
@@ -147,6 +158,39 @@ void CableSystem::update(double updateInterval) {
 				}
 			}
 
+			{
+				ZoneScopedN("CableSystem::finding particle collision candidates");
+
+				const float padding = particleRadius + collisionMargin;
+				cable.particleColliderCandidateOffsets.resize(cable.particles.size() + 1);
+				cable.particleColliderCandidateIndices.clear();
+
+				for (size_t i = 0; i < cable.particles.size(); i++) {
+					const CableParticle& particle = cable.particles[i];
+					cable.particleColliderCandidateOffsets[i] = cable.particleColliderCandidateIndices.size();
+
+					const glm::vec3 minPos = glm::min(particle.prevPosition, particle.position);
+					const glm::vec3 maxPos = glm::max(particle.prevPosition, particle.position);
+
+					const glm::vec3 center = (minPos + maxPos) * 0.5f;
+					const glm::vec3 fullSize = (maxPos - minPos) + glm::vec3(padding * 2.0f);
+
+					AABBOverlapQuery query{.position = center, .size = fullSize};
+
+					for (size_t candidateIndex = 0; candidateIndex < cable.colliderCandidates.size(); candidateIndex++) {
+						const CableColliderCandidate& candidate = cable.colliderCandidates[candidateIndex];
+						CollisionHit hit;
+						if (m_pPhysics->AABBIntersectCollider(
+								query, candidate.colliderType, candidate.colliderTransform, hit)) {
+							cable.particleColliderCandidateIndices.push_back(candidateIndex);
+						}
+					}
+				}
+
+				cable.particleColliderCandidateOffsets[cable.particles.size()] =
+					cable.particleColliderCandidateIndices.size();
+			}
+
 			for (int iter = 0; iter < solverIterations; iter++) {
 				ZoneScopedN("CableSystem::solver iteration");
 
@@ -154,14 +198,14 @@ void CableSystem::update(double updateInterval) {
 					ZoneScopedN("CableSystem::solve distance constraints");
 
 					for (const std::vector<size_t>& batch : cable.coloredConstraints) {
-						std::for_each(std::execution::par, batch.begin(), batch.end(), [&](size_t constraintIndex) {
+						for (size_t constraintIndex : batch) {
 							CableDistanceConstraint& constraint = cable.constraints[constraintIndex];
 							glm::vec3 correction = this->calculateDistanceConstraint(cable, constraint, deltaTime);
 							auto& particleA = cable.particles[constraint.indexParticleA];
 							auto& particleB = cable.particles[constraint.indexParticleB];
 							particleA.position += particleA.inverseMass * correction;
 							particleB.position -= particleB.inverseMass * correction;
-						});
+						}
 					}
 				}
 
@@ -171,14 +215,16 @@ void CableSystem::update(double updateInterval) {
 					cable.collisionConstraints.clear();
 
 					for (size_t i = 0; i < cable.particles.size(); i++) {
-						hits.clear();
 						auto& particle = cable.particles[i];
 						Sphere sphere(particle.position, particleRadius);
-						for (CableColliderCandidate& cableCandidate : cable.colliderCandidates) {
-							ZoneScopedN("CableSystem::physics sphere intersect");
+						const size_t beginCandidate = cable.particleColliderCandidateOffsets[i];
+						const size_t endCandidate = cable.particleColliderCandidateOffsets[i + 1];
+						for (size_t candidateOffset = beginCandidate; candidateOffset < endCandidate; candidateOffset++) {
+							const size_t candidateIndex = cable.particleColliderCandidateIndices[candidateOffset];
+							const CableColliderCandidate& particleCandidate = cable.colliderCandidates[candidateIndex];
 							CollisionHit hit;
 							bool result = m_pPhysics->sphereIntersectCollider(
-								sphere, cableCandidate.colliderType, cableCandidate.colliderTransform, hit);
+								sphere, particleCandidate.colliderType, particleCandidate.colliderTransform, hit);
 							if (result) {
 								cable.collisionConstraints.push_back({.particleIndex = i,
 									.normal = hit.normal,
@@ -233,6 +279,9 @@ void CableSystem::update(double updateInterval) {
 
 			if (m_pRegistry->any_of<PrimitiveLines>(entity)) {
 				auto& lines = m_pRegistry->get<PrimitiveLines>(entity);
+				const size_t requiredLineCount = cable.particles.size() > 0 ? cable.particles.size() - 1 : 0;
+				lines.lines.resize(
+					requiredLineCount, PrimitiveLine(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0, 0, 1)));
 				for (size_t i = 1; i < cable.particles.size(); i++) {
 					auto& particleA = cable.particles[i - 1];
 					auto& particleB = cable.particles[i];
@@ -335,19 +384,15 @@ CableBounds CableSystem::computeCableBounds(const Cable& cable) {
 	glm::vec3 max(-std::numeric_limits<float>::infinity());
 
 	for (const CableParticle& particle : cable.particles) {
-		auto& pos = particle.position;
+		const glm::vec3& pos = particle.position;
 
-		for (const CableParticle& particle : cable.particles) {
-			const glm::vec3& pos = particle.position;
+		min.x = std::min(min.x, pos.x);
+		min.y = std::min(min.y, pos.y);
+		min.z = std::min(min.z, pos.z);
 
-			min.x = std::min(min.x, pos.x);
-			min.y = std::min(min.y, pos.y);
-			min.z = std::min(min.z, pos.z);
-
-			max.x = std::max(max.x, pos.x);
-			max.y = std::max(max.y, pos.y);
-			max.z = std::max(max.z, pos.z);
-		}
+		max.x = std::max(max.x, pos.x);
+		max.y = std::max(max.y, pos.y);
+		max.z = std::max(max.z, pos.z);
 	}
 
 	glm::vec3 center = (min + max) * 0.5f;

@@ -9,7 +9,12 @@ struct CableAnchor {};
 
 struct CableAttachment {};
 
-
+struct CableColliderCandidate {
+	entt::entity ownerEntity = entt::null;
+	entt::entity colliderEntity = entt::null;
+	ColliderType colliderType;
+	Transform colliderTransform;
+};
 
 struct CableParticle {
 	float inverseMass;
@@ -24,6 +29,7 @@ struct CableParticle {
 	// previous state (for velocity derivation)
 	glm::vec3 prevPosition;
 	glm::quat prevRotation;
+
 };
 
 struct CableDistanceConstraint {
@@ -43,13 +49,6 @@ struct CableCollisionConstraint {
 	float compliance;
 };
 
-struct CableColliderCandidate {
-	entt::entity ownerEntity = entt::null;
-	entt::entity colliderEntity = entt::null;
-	ColliderType colliderType;
-	Transform colliderTransform;
-};
-
 struct Cable {
 	// cache friendly data allocation
 	std::vector<CableParticle> particles;
@@ -60,4 +59,8 @@ struct Cable {
 	std::vector<CableCollisionConstraint> collisionConstraints;
 
 	std::vector<CableColliderCandidate> colliderCandidates;
+	std::vector<size_t> particleColliderCandidateOffsets;
+	std::vector<size_t> particleColliderCandidateIndices;
+	std::vector<bool> particleHadCollisionScratch;
+	std::vector<glm::vec3> particleCollisionNormalScratch;
 };

@@ -1,45 +1,45 @@
 {
-  "project": "INDUSTRY",
-  "version": "0.0.1-alpha",
-  "packs": {
-    "dev": "dev/pack.json",
-    "game": "game/pack.json"
-  },
-  "engine_config": {
-    "cl_debug_mode": "false",
-    "ph_debug_mode": "false",
-    "npc_show_graph": "false",
-    "gh_vsync": "true",
-    "gh_fov": "90.0",
-    "gui_imgui_debug": "false",
-    "gh_window_width": "1920",
-    "gh_window_height": "1080",
-    "gh_window_aspect_ratio_x": "16",
-    "gh_window_aspect_ratio_y": "9",
-    "gh_target_fps": "60"
-  },
-  "game_config": {
-    "kb_forward": "W",
-    "kb_left": "A",
-    "kb_back": "S",
-    "kb_right": "D",
-    "kb_up": "SPACE",
-    "kb_fast": "LEFT_SHIFT",
-    "kb_down": "LEFT_CTRL",
-    "kb_use": "E",
-    "kb_menu": "ESC",
-    "kb_select": "MOUSE_BUTTON_LEFT",
-    "kb_build": "MOUSE_BUTTON_RIGHT",
-    "kb_rotate_camera": "MOUSE_BUTTON_MIDDLE",
-    "kb_machine_menu": "Q",
-    "kb_rotate_blueprint": "R",
-    "kb_remove_blueprint": "Z",
+	"project": "INDUSTRY",
+	"version": "0.0.1-alpha",
+	"packs": {
+		"dev": "dev/pack.json",
+		"game": "game/pack.json"
+	},
+	"engine_config": {
+		"cl_debug_mode": "true",
+		"ph_debug_mode": "false",
+		"npc_show_graph": "false",
+		"gh_vsync": "true",
+		"gh_fov": "90.0",
+		"gui_imgui_debug": "false",
+		"gh_window_width": "1920",
+		"gh_window_height": "1080",
+		"gh_window_aspect_ratio_x": "16",
+		"gh_window_aspect_ratio_y": "9",
+		"gh_target_fps": "60"
+	},
+	"game_config": {
+		"kb_forward": "W",
+		"kb_left": "A",
+		"kb_back": "S",
+		"kb_right": "D",
+		"kb_up": "SPACE",
+		"kb_fast": "LEFT_SHIFT",
+		"kb_down": "LEFT_CTRL",
+		"kb_use": "E",
+		"kb_menu": "ESC",
+		"kb_select": "MOUSE_BUTTON_LEFT",
+		"kb_build": "MOUSE_BUTTON_RIGHT",
+		"kb_rotate_camera": "MOUSE_BUTTON_MIDDLE",
+		"kb_machine_menu": "Q",
+		"kb_rotate_blueprint": "R",
+		"kb_remove_blueprint": "Z",
 
-    "game_combustion_heat_diesel": "43400000.0",
-    "game_combustion_heat_anthracite": "32500000.0",
-    "game_combustion_heat_wood": "16300000.0",
-    "game_burning_duration_wood": "60",
-    "game_heater_efficiency": "0.80",
-    "game_require_blueprint" :  "false"
-  }
+		"game_combustion_heat_diesel": "43400000.0",
+		"game_combustion_heat_anthracite": "32500000.0",
+		"game_combustion_heat_wood": "16300000.0",
+		"game_burning_duration_wood": "60",
+		"game_heater_efficiency": "0.80",
+		"game_require_blueprint": "false"
+	}
 }

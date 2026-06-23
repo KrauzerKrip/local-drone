@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.13)
+cmake_minimum_required(VERSION 3.13)
 
 project(lc_client)
 
@@ -8,10 +8,7 @@ add_library(glad ../libs/glad/src/glad.c)
 target_include_directories(glad PUBLIC ../libs/glad/include)
 
 find_package(OpenGL REQUIRED)
-target_link_libraries(lc_client
-    PUBLIC
-        OpenGL::GL
-)
+target_link_libraries(lc_client PUBLIC OpenGL::GL)
 
 find_package(glfw3 CONFIG REQUIRED)
 find_package(EnTT CONFIG REQUIRED)
@@ -36,16 +33,14 @@ target_link_libraries(lc_client PRIVATE ${LUA_LIBRARIES})
 target_link_libraries(lc_client PRIVATE imgui::imgui)
 target_link_libraries(lc_client PRIVATE Freetype::Freetype)
 target_link_libraries(lc_client PRIVATE spdlog::spdlog)
-#target_link_libraries(lc_client PRIVATE eng::rc)
+# target_link_libraries(lc_client PRIVATE eng::rc)
 target_link_libraries(lc_client PRIVATE stb)
 
-target_sources(lc_client
-    PRIVATE
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/lc_client/i_game_logic.h"
-
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/lc_client/loop.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/lc_client/loop.h"
- )
+target_sources(
+  lc_client
+  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/lc_client/i_game_logic.h"
+          "${CMAKE_CURRENT_SOURCE_DIR}/src/lc_client/loop.cpp"
+          "${CMAKE_CURRENT_SOURCE_DIR}/src/lc_client/loop.h")
 
 add_subdirectory("include/ldk_client/local_engine")
 
@@ -72,13 +67,12 @@ add_subdirectory("src/lc_client/tier1")
 add_subdirectory("src/lc_client/exceptions")
 add_subdirectory("src/lc_client/util")
 
-#target_compile_definitions(lc_client PUBLIC USE_BARRY) #for preprocessor definitions
-target_include_directories(lc_client
-    PUBLIC
-        $<INSTALL_INTERFACE:/include>
-        $<INSTALL_INTERFACE:/src>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
-)
+# target_compile_definitions(lc_client PUBLIC USE_BARRY) #for preprocessor
+# definitions
+target_include_directories(
+  lc_client
+  PUBLIC $<INSTALL_INTERFACE:/include> $<INSTALL_INTERFACE:/src>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
 
 add_subdirectory("test")

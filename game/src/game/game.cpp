@@ -54,6 +54,8 @@
 #include "game/resource/components.h"
 #include "game_conpars_init.h"
 
+#include <tracy/Tracy.hpp>
+
 
 Game::Game(IWindow* pWindow, Tier0* pTier0, std::filesystem::path resourceDir) {
 	m_pWindow = pWindow;
@@ -206,7 +208,7 @@ void Game::init() {
 	pRegistry->emplace<Wood>(wood);
 	pRegistry->emplace<Item>(wood, Item("wood"));
 
-	for (int i = 1; i < 10; i++) {
+	for (int i = 1; i < 15; i++) {
 		entt::entity bush = pRegistry->create();
 		pRegistry->emplace<Properties>(bush, Properties());
 		pRegistry->emplace<Bush>(bush);
@@ -265,7 +267,7 @@ void Game::init() {
 	pRegistry->emplace<Tree>(tree);
 
 	glm::vec3 cablePos(5, 20, 0);
-	int numberOfSegments = 70;
+	int numberOfSegments = 100;
 	float segmentInterval = 1;
 	float particleMass = 0.1;
 

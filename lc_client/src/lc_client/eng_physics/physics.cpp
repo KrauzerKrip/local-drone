@@ -29,6 +29,29 @@ std::optional<CollisionHit> Physics::sphereIntersect(
 	};
 }
 
+std::optional<CollisionHit> Physics::AABBIntersect(
+	const AABBOverlapQuery& aabbQuery, entt::entity ownerEntity, entt::entity colliderEntity) {
+	if (!m_pRegistry->all_of<BoxCollider, Transform>(colliderEntity)) {
+		return std::nullopt;
+	}
+
+	AABB aabb(aabbQuery.position, aabbQuery.size);
+	const Transform& colliderTransform = m_pRegistry->get<Transform>(colliderEntity);
+	const std::optional<AABBCollisionHit> aabbHit = aabb.getOverlapWithOBB(colliderTransform);
+	if (!aabbHit) {
+		return std::nullopt;
+	}
+
+	return CollisionHit{
+		.ownerEntity = ownerEntity,
+		.colliderEntity = colliderEntity,
+		.colliderType = ColliderType::BOX,
+		.normal = aabbHit->normal,
+		.point = aabbHit->point,
+		.penetrationDepth = aabbHit->penetrationDepth,
+	};
+}
+
 bool Physics::sphereIntersectCollider(
 	const Sphere& sphere, ColliderType colliderType, const Transform& colliderTransform, CollisionHit& outHit) const {
 	switch (colliderType) {
@@ -39,6 +62,27 @@ bool Physics::sphereIntersectCollider(
 			outHit.normal = sphereHit.normal;
 			outHit.point = sphereHit.point;
 			outHit.penetrationDepth = sphereHit.penetrationDepth;
+			return true;
+		}
+		return false;
+	}
+
+	default:
+		return false;
+	}
+}
+
+bool Physics::AABBIntersectCollider(const AABBOverlapQuery& query, ColliderType colliderType,
+	const Transform& colliderTransform, CollisionHit& outHit) const {
+	AABB aabb(query.position, query.size);
+	switch (colliderType) {
+	case ColliderType::BOX: {
+		const auto maybeHit = aabb.getOverlapWithOBB(colliderTransform);
+		if (maybeHit) {
+			AABBCollisionHit aabbHit = *maybeHit;
+			outHit.normal = aabbHit.normal;
+			outHit.point = aabbHit.point;
+			outHit.penetrationDepth = aabbHit.penetrationDepth;
 			return true;
 		}
 		return false;

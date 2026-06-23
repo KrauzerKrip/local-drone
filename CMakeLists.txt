@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 20)
 project("industry")
 
 option(ENABLE_PROFILER "Enable Tracy Profiling" ON)
+option(ENABLE_PROFILER_ON_DEMAND "Collect Tracy data only while a profiler is connected" ON)
+option(TRACY_IGNORE_MEMORY_FAULTS ON)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -24,9 +26,18 @@ target_include_directories(game PRIVATE lc_client)
 target_link_libraries(game PUBLIC lc_client)
 
 if(ENABLE_PROFILER)
+  if(ENABLE_PROFILER_ON_DEMAND)
+    set(TRACY_ON_DEMAND
+        ON
+        CACHE BOOL "On-demand profiling" FORCE)
+  endif()
   add_subdirectory(external/tracy)
-  target_link_libraries(game PRIVATE Tracy::TracyClient)
+  target_link_libraries(lc_client PUBLIC Tracy::TracyClient)
+  target_compile_definitions(lc_client PUBLIC TRACY_ENABLE)
+
   target_compile_definitions(game PRIVATE TRACY_ENABLE)
+
+  target_compile_definitions(game_exe PRIVATE TRACY_ENABLE)
 endif()
 
 target_compile_options(lc_client PRIVATE $<$<CONFIG:Debug>:-g>
