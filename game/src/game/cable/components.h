@@ -54,6 +54,9 @@ struct Cable {
 	// cache friendly data allocation
 	std::vector<CableParticle> particles;
 	std::vector<CableDistanceConstraint> constraints;
+	std::vector<std::vector<size_t>> coloredConstraints;
+	bool coloredConstraintsDirty = true;
+	size_t coloredConstraintCount = 0;
 	std::vector<CableCollisionConstraint> collisionConstraints;
 
 	std::vector<CableColliderCandidate> colliderCandidates;

@@ -265,7 +265,7 @@ void Game::init() {
 	pRegistry->emplace<Tree>(tree);
 
 	glm::vec3 cablePos(5, 20, 0);
-	int numberOfSegments = 60;
+	int numberOfSegments = 70;
 	float segmentInterval = 1;
 	float particleMass = 0.1;
 
@@ -294,6 +294,7 @@ void Game::init() {
 			cable.constraints.push_back(constraint);
 		}
 	}
+	cable.coloredConstraintsDirty = true;
 
 	entt::entity cableEntity = pRegistry->create();
 	pRegistry->emplace<Cable>(cableEntity, cable);
