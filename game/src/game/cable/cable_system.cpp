@@ -1,6 +1,7 @@
 #include "cable_system.h"
 #include <algorithm>
 #include <entt/entity/fwd.hpp>
+#include <execution>
 #include <glm/ext/quaternion_geometric.hpp>
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
@@ -18,6 +19,46 @@
 #else
 #define ZoneScopedN(name)
 #endif
+
+namespace {
+	std::vector<std::vector<size_t>> colorConstraints(const Cable& cable) {
+		std::vector<std::vector<size_t>> colors;
+		std::vector<std::vector<bool>> colorUsesParticle;
+
+		for (size_t constraintIndex = 0; constraintIndex < cable.constraints.size(); constraintIndex++) {
+			const CableDistanceConstraint& constraint = cable.constraints[constraintIndex];
+			size_t colorIndex = 0;
+
+			for (; colorIndex < colors.size(); colorIndex++) {
+				if (!colorUsesParticle[colorIndex][constraint.indexParticleA] &&
+					!colorUsesParticle[colorIndex][constraint.indexParticleB]) {
+					break;
+				}
+			}
+
+			if (colorIndex == colors.size()) {
+				colors.emplace_back();
+				colorUsesParticle.emplace_back(cable.particles.size(), false);
+			}
+
+			colors[colorIndex].push_back(constraintIndex);
+			colorUsesParticle[colorIndex][constraint.indexParticleA] = true;
+			colorUsesParticle[colorIndex][constraint.indexParticleB] = true;
+		}
+
+		return colors;
+	}
+
+	void updateColoredConstraints(Cable& cable) {
+		if (!cable.coloredConstraintsDirty && cable.coloredConstraintCount == cable.constraints.size()) {
+			return;
+		}
+
+		cable.coloredConstraints = colorConstraints(cable);
+		cable.coloredConstraintCount = cable.constraints.size();
+		cable.coloredConstraintsDirty = false;
+	}
+}
 
 CableSystem::CableSystem(Physics* pPhysics, entt::registry* pRegistry) {
 	m_pPhysics = pPhysics;
@@ -39,6 +80,8 @@ void CableSystem::update(double updateInterval) {
 
 	for (auto&& [entity, cable] : m_pRegistry->view<Cable>().each()) {
 		ZoneScopedN("CableSystem::update cable");
+
+		updateColoredConstraints(cable);
 
 		std::vector<bool> particleHadCollision(cable.particles.size(), false);
 		std::vector<glm::vec3> particleCollisionNormal(cable.particles.size(), glm::vec3(0.0f));
@@ -110,12 +153,15 @@ void CableSystem::update(double updateInterval) {
 				{
 					ZoneScopedN("CableSystem::solve distance constraints");
 
-					for (CableDistanceConstraint& constraint : cable.constraints) {
-						glm::vec3 correction = this->calculateDistanceConstraint(cable, constraint, deltaTime);
-						auto& particleA = cable.particles[constraint.indexParticleA];
-						auto& particleB = cable.particles[constraint.indexParticleB];
-						particleA.position += particleA.inverseMass * correction;
-						particleB.position -= particleB.inverseMass * correction;
+					for (const std::vector<size_t>& batch : cable.coloredConstraints) {
+						std::for_each(std::execution::par, batch.begin(), batch.end(), [&](size_t constraintIndex) {
+							CableDistanceConstraint& constraint = cable.constraints[constraintIndex];
+							glm::vec3 correction = this->calculateDistanceConstraint(cable, constraint, deltaTime);
+							auto& particleA = cable.particles[constraint.indexParticleA];
+							auto& particleB = cable.particles[constraint.indexParticleB];
+							particleA.position += particleA.inverseMass * correction;
+							particleB.position -= particleB.inverseMass * correction;
+						});
 					}
 				}
 
