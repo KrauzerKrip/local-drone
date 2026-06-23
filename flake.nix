@@ -105,6 +105,18 @@
                     pkg-config
                     cmake-format
                     nixfmt
+                    dbus
+                    gtk3
+                    libcap
+                    openssl
+                    libxkbcommon
+                    wayland
+                    wayland-protocols
+                    wayland-scanner
+                    libglvnd
+                    gnumake
+                    binutils
+                    llvmPackages.bintools
 
                     lua
                     glfw
@@ -131,6 +143,14 @@
                     libGLU
                   ]
                   ++ (if system == "aarch64-darwin" then [ ] else [ gdb ]);
+
+                  shellHook = ''
+                    export CC=clang
+                    export CXX=clang++
+                    export AR=${pkgs.llvmPackages.bintools}/bin/llvm-ar
+                    export RANLIB=${pkgs.llvmPackages.bintools}/bin/llvm-ranlib
+                    export NM=${pkgs.llvmPackages.bintools}/bin/llvm-nm
+                  '';
               };
         }
       );
