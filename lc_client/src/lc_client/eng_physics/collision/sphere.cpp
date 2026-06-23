@@ -59,10 +59,12 @@ glm::vec3 Sphere::getClosestPointOnOBB(const Transform& boxTransform) const {
 	glm::vec3 distanceVec = m_center - boxTransform.position;
 	glm::vec3 closesPoint = boxTransform.position;
 
+	glm::mat3 rotMatrix = glm::toMat3(boxTransform.rotation);
+
 	std::array<glm::vec3, 3> axes{
-		boxTransform.rotation * glm::vec3(1, 0, 0),
-		boxTransform.rotation * glm::vec3(0, 1, 0),
-		boxTransform.rotation * glm::vec3(0, 0, 1),
+		rotMatrix[0], // X-axis
+		rotMatrix[1], // Y-axis
+		rotMatrix[2]  // Z-axis
 	};
 	for (uint dimIdx = 0; dimIdx < 3; dimIdx++) {
 		float dist = glm::dot(distanceVec, axes[dimIdx]);
