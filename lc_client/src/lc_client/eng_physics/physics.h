@@ -10,6 +10,7 @@
 #include "lc_client/eng_physics/entt/components.h"
 #include "lc_client/eng_scene/entt/components.h"
 #include "raycast/ray.h"
+#include "collision/aabb.h"
 #include "collision/sphere.h"
 
 struct CollisionHit {
@@ -36,6 +37,8 @@ public:
 		entt::exclude_t<Exclude...> exclude = entt::exclude_t{});
 	std::optional<CollisionHit> sphereIntersect(
 		const SphereOverlapQuery& sphereQuery, entt::entity ownerEntity, entt::entity colliderEntity);
+	std::optional<CollisionHit> AABBIntersect(
+		const AABBOverlapQuery& aabbQuery, entt::entity ownerEntity, entt::entity colliderEntity);
 	/**
 	 * @brief Computes contact between a sphere and a single collider.
 	 *
@@ -52,6 +55,8 @@ public:
 	 */
 	bool sphereIntersectCollider(const Sphere& sphere, ColliderType colliderType, const Transform& colliderTransform,
 		CollisionHit& outHit) const;
+	bool AABBIntersectCollider(const AABBOverlapQuery& query, ColliderType colliderType,
+		const Transform& colliderTransform, CollisionHit& outHit) const;
 
 private:
 	template <typename... Components, typename... Exclude>
@@ -89,103 +94,16 @@ void Physics::queryAABBOverlaps(
 	outHits.clear();
 
 	auto entities = m_pRegistry->view<Colliders, Transform, Components...>(exclude);
-	const glm::vec3 queryExtents = glm::abs(query.size);
-	const std::array<glm::vec3, 3> queryAxes{
-		glm::vec3(1.0f, 0.0f, 0.0f),
-		glm::vec3(0.0f, 1.0f, 0.0f),
-		glm::vec3(0.0f, 0.0f, 1.0f),
-	};
 
-	for (entt::entity entity : entities) {
-		const Colliders& colliders = m_pRegistry->get<Colliders>(entity);
+	for (auto&& [entity, colliders, transform] : entities.each()) {
 		for (auto&& [colliderEnt, colliderType] : colliders.colliders) {
 			if (colliderType != ColliderType::BOX) {
 				continue;
 			}
 
-			const Transform& colliderTransform = m_pRegistry->get<Transform>(colliderEnt);
-			const glm::vec3 colliderExtents = glm::abs(colliderTransform.scale);
-			const std::array<glm::vec3, 3> colliderAxes{
-				colliderTransform.rotation * queryAxes[0],
-				colliderTransform.rotation * queryAxes[1],
-				colliderTransform.rotation * queryAxes[2],
-			};
-			const glm::vec3 centerOffset = query.position - colliderTransform.position;
-
-			float minimumPenetration = std::numeric_limits<float>::max();
-			glm::vec3 collisionNormal(0.0f);
-			bool overlaps = true;
-
-			auto testAxis = [&](glm::vec3 axis) {
-				const float axisLengthSquared = glm::dot(axis, axis);
-				if (axisLengthSquared < 0.00000001f) {
-					return;
-				}
-
-				axis /= std::sqrt(axisLengthSquared);
-				float queryRadius = 0.0f;
-				float colliderRadius = 0.0f;
-				for (std::size_t dimension = 0; dimension < 3; ++dimension) {
-					queryRadius += queryExtents[dimension] * std::abs(glm::dot(queryAxes[dimension], axis));
-					colliderRadius += colliderExtents[dimension] * std::abs(glm::dot(colliderAxes[dimension], axis));
-				}
-
-				const float signedDistance = glm::dot(centerOffset, axis);
-				const float penetration = queryRadius + colliderRadius - std::abs(signedDistance);
-				if (penetration < 0.0f) {
-					overlaps = false;
-					return;
-				}
-
-				if (penetration < minimumPenetration) {
-					minimumPenetration = penetration;
-					collisionNormal = signedDistance < 0.0f ? -axis : axis;
-				}
-			};
-
-			for (const glm::vec3& axis : queryAxes) {
-				testAxis(axis);
-				if (!overlaps)
-					break;
+			if (std::optional<CollisionHit> hit = AABBIntersect(query, entity, colliderEnt)) {
+				outHits.push_back(*hit);
 			}
-			for (const glm::vec3& axis : colliderAxes) {
-				if (!overlaps)
-					break;
-				testAxis(axis);
-			}
-			for (const glm::vec3& queryAxis : queryAxes) {
-				for (const glm::vec3& colliderAxis : colliderAxes) {
-					if (!overlaps)
-						break;
-					testAxis(glm::cross(queryAxis, colliderAxis));
-				}
-				if (!overlaps)
-					break;
-			}
-
-			if (!overlaps) {
-				continue;
-			}
-
-			glm::vec3 point = colliderTransform.position;
-			for (std::size_t dimension = 0; dimension < 3; ++dimension) {
-				const float normalProjection = glm::dot(collisionNormal, colliderAxes[dimension]);
-				const float localPoint =
-					std::abs(normalProjection) > 0.00001f
-						? (normalProjection < 0.0f ? -colliderExtents[dimension] : colliderExtents[dimension])
-						: glm::clamp(glm::dot(centerOffset, colliderAxes[dimension]), -colliderExtents[dimension],
-							  colliderExtents[dimension]);
-				point += colliderAxes[dimension] * localPoint;
-			}
-
-			outHits.push_back(CollisionHit{
-				.ownerEntity = entity,
-				.colliderEntity = colliderEnt,
-				.colliderType = colliderType,
-				.normal = collisionNormal,
-				.point = point,
-				.penetrationDepth = minimumPenetration,
-			});
 		}
 	}
 }

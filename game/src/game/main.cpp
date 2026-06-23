@@ -16,7 +16,6 @@
 
 namespace fs = std::filesystem;
 
-
 void printException(const std::exception& e, int level = 0) {
 	LE_GAME_CRITICAL("{}Exception: {}", std::string(level, ' '), e.what());
 	try {
@@ -30,21 +29,21 @@ void printException(const std::exception& e, int level = 0) {
 }
 
 std::optional<fs::path> resolveResourceDir(int argc, char** argv) {
-    // 1) Check CLI args: --res-dir=...
-    for (int i = 1; i < argc; ++i) {
-        std::string arg = argv[i];
-        std::string prefix = "--res-dir=";
-        if (arg.rfind(prefix, 0) == 0) { // starts with
-            return fs::absolute(arg.substr(prefix.size()));
-        }
-    }
+	// 1) Check CLI args: --res-dir=...
+	for (int i = 1; i < argc; ++i) {
+		std::string arg = argv[i];
+		std::string prefix = "--res-dir=";
+		if (arg.rfind(prefix, 0) == 0) { // starts with
+			return fs::absolute(arg.substr(prefix.size()));
+		}
+	}
 
-    // 2) Check env var
-    if (const char* env = std::getenv("GAME_RES_DIR")) {
-        return fs::absolute(env);
-    }
+	// 2) Check env var
+	if (const char* env = std::getenv("GAME_RES_DIR")) {
+		return fs::absolute(env);
+	}
 
-    return {};
+	return {};
 }
 
 int main(int argc, char** argv) {
@@ -65,22 +64,22 @@ int main(int argc, char** argv) {
 	Loop* pLoop = nullptr;
 	const auto maybeResourceDir = resolveResourceDir(argc, argv);
 	if (!maybeResourceDir.has_value()) {
-	    throw std::runtime_error("resource directory is not specified");
+		throw std::runtime_error("resource directory is not specified");
 	}
 	const auto resourceDir = maybeResourceDir.value();
-	//try {
-		pTier0 = new Tier0(resourceDir);
+	// try {
+	pTier0 = new Tier0(resourceDir);
 
-		pWindow = new WindowGL(title, width, height, new int[2]{16, 9});
-		pGameLogic = new Game(pWindow, pTier0, resourceDir);
-		pLoop = Loop::createInstance(pWindow, pGameLogic, targetFPS, targetUPS);
+	pWindow = new WindowGL(title, width, height, new int[2]{16, 9});
+	pGameLogic = new Game(pWindow, pTier0, resourceDir);
+	pLoop = Loop::createInstance(pWindow, pGameLogic, targetFPS, targetUPS);
 
-		pLoop->init();
-		pLoop->startLoop();
+	pLoop->init();
+	pLoop->startLoop();
 
-		pLoop->cleanUp();
+	pLoop->cleanUp();
 	//}
-	//catch (std::runtime_error& exception) {
+	// catch (std::runtime_error& exception) {
 	//	printException(exception);
 	//	//abort();
 	//	exit(-1);
