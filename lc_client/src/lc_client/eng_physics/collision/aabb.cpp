@@ -2,6 +2,7 @@
 #include <array>
 #include <cmath>
 #include <glm/geometric.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <limits>
 #include <optional>
 
@@ -15,10 +16,11 @@ std::optional<AABBCollisionHit> AABB::getOverlapWithOBB(const Transform& boxTran
 		glm::vec3(0.0f, 0.0f, 1.0f),
 	};
 	const glm::vec3 colliderExtents = glm::abs(boxTransform.scale);
+	const glm::mat3 colliderRotation = glm::toMat3(boxTransform.rotation);
 	const std::array<glm::vec3, 3> colliderAxes{
-		boxTransform.rotation * aabbAxes[0],
-		boxTransform.rotation * aabbAxes[1],
-		boxTransform.rotation * aabbAxes[2],
+		colliderRotation[0],
+		colliderRotation[1],
+		colliderRotation[2],
 	};
 	const glm::vec3 centerOffset = m_position - boxTransform.position;
 
