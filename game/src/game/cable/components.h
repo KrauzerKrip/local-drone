@@ -1,13 +1,18 @@
 #include "lc_client/eng_physics/physics.h"
+#include "lc_client/eng_scene/entt/components.h"
 #include <cstddef>
 #include <glm/vec3.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <optional>
 #include <vector>
 #include <entt/entt.hpp>
 
 struct CableAnchor {};
 
-struct CableAttachment {};
+struct CableParticleAttachment {
+	entt::entity anchor;
+	glm::vec3 offset;
+};
 
 struct CableColliderCandidate {
 	entt::entity ownerEntity = entt::null;
@@ -30,6 +35,7 @@ struct CableParticle {
 	glm::vec3 prevPosition;
 	glm::quat prevRotation;
 
+	std::optional<CableParticleAttachment> attachment;
 };
 
 struct CableDistanceConstraint {

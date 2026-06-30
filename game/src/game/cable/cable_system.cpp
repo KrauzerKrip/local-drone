@@ -10,6 +10,7 @@
 #include "lc_client/eng_physics/collision/sphere.h"
 #include "lc_client/eng_physics/entt/components.h"
 #include "lc_client/eng_physics/physics.h"
+#include "lc_client/eng_scene/entt/components.h"
 #include "lc_client/exceptions/component_exception.h"
 #include <limits>
 
@@ -21,9 +22,10 @@
 
 namespace {
 	bool containsCandidate(const std::vector<CableColliderCandidate>& candidates, entt::entity colliderEntity) {
-		return std::any_of(candidates.begin(), candidates.end(), [colliderEntity](const CableColliderCandidate& candidate) {
-			return candidate.colliderEntity == colliderEntity;
-		});
+		return std::any_of(
+			candidates.begin(), candidates.end(), [colliderEntity](const CableColliderCandidate& candidate) {
+				return candidate.colliderEntity == colliderEntity;
+			});
 	}
 
 	std::vector<std::vector<size_t>> colorConstraints(const Cable& cable) {
@@ -112,6 +114,7 @@ void CableSystem::update(double updateInterval) {
 						continue;
 					}
 					this->applyExternalForces(particle, deltaTime);
+					this->applyAttachment(particle, deltaTime);
 				}
 			}
 
@@ -177,7 +180,8 @@ void CableSystem::update(double updateInterval) {
 
 					AABBOverlapQuery query{.position = center, .size = fullSize};
 
-					for (size_t candidateIndex = 0; candidateIndex < cable.colliderCandidates.size(); candidateIndex++) {
+					for (size_t candidateIndex = 0; candidateIndex < cable.colliderCandidates.size();
+						candidateIndex++) {
 						const CableColliderCandidate& candidate = cable.colliderCandidates[candidateIndex];
 						CollisionHit hit;
 						if (m_pPhysics->AABBIntersectCollider(
@@ -219,7 +223,8 @@ void CableSystem::update(double updateInterval) {
 						Sphere sphere(particle.position, particleRadius);
 						const size_t beginCandidate = cable.particleColliderCandidateOffsets[i];
 						const size_t endCandidate = cable.particleColliderCandidateOffsets[i + 1];
-						for (size_t candidateOffset = beginCandidate; candidateOffset < endCandidate; candidateOffset++) {
+						for (size_t candidateOffset = beginCandidate; candidateOffset < endCandidate;
+							candidateOffset++) {
 							const size_t candidateIndex = cable.particleColliderCandidateIndices[candidateOffset];
 							const CableColliderCandidate& particleCandidate = cable.colliderCandidates[candidateIndex];
 							CollisionHit hit;
@@ -302,14 +307,7 @@ void CableSystem::update(double updateInterval) {
 	}
 }
 
-void CableSystem::connectWithCable(entt::entity anchor, entt::entity attachment) {
-	if (!m_pRegistry->any_of<CableAnchor>(anchor)) {
-		throw ComponentNotFoundException("CableAnchor");
-	}
-	if (!m_pRegistry->any_of<CableAttachment>(attachment)) {
-		throw ComponentNotFoundException("CableAttachment");
-	}
-}
+void CableSystem::connectWithCable(entt::entity anchor, entt::entity attachment) {}
 
 glm::vec3 CableSystem::calculateCollisionConstraint(
 	Cable& cable, CableCollisionConstraint& constraint, double deltaTime) {
@@ -374,6 +372,19 @@ void CableSystem::applyExternalForces(CableParticle& particle, double deltaTime)
 
 	particle.linearVelocity += gravityAccel * static_cast<float>(deltaTime);
 	particle.position += particle.linearVelocity * static_cast<float>(deltaTime);
+}
+
+void CableSystem::applyAttachment(CableParticle& particle, double deltaTime) {
+	if (!particle.attachment.has_value()) {
+		return;
+	}
+
+	const auto attachment = *particle.attachment;
+
+	Transform& transform = m_pRegistry->get<Transform>(attachment.anchor);
+	glm::vec3 anchorWorldPos = transform.position + attachment.offset;
+	particle.position = anchorWorldPos;
+	particle.linearVelocity = (particle.position - particle.prevPosition) / static_cast<float>(deltaTime);
 }
 
 CableBounds CableSystem::computeCableBounds(const Cable& cable) {

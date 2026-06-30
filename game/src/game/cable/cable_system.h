@@ -21,6 +21,7 @@ private:
 	glm::vec3 calculateCollisionConstraint(Cable& cable, CableCollisionConstraint& constraint, double deltaTime);
 	glm::vec3 calculateDistanceConstraint(Cable& cable, CableDistanceConstraint& constraint, double deltaTime);
 	void applyExternalForces(CableParticle& particle, double deltaTime);
+	void applyAttachment(CableParticle& particle, double deltaTime);
 	CableBounds computeCableBounds(const Cable& cable);
 
 	Physics* m_pPhysics = nullptr;

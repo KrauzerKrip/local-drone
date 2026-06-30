@@ -281,7 +281,9 @@ void Game::init() {
 			.inverseInertia = glm::vec3(0, 0, 0),
 			.rotation = glm::vec3(0, 0, 0),
 			.position = cablePos + glm::vec3(i * segmentInterval, 0, 0)};
-
+		if (i == 0) {
+			particle.attachment = CableParticleAttachment{.anchor = droneEntity, .offset = glm::vec3(0, -1, 0)};
+		}
 		cable.particles.push_back(particle);
 
 		if (i > 0) {
