@@ -53,6 +53,7 @@
 #include "game/machine/machine_type.h"
 #include "game/resource/components.h"
 #include "game_conpars_init.h"
+#include "drone/components.h"
 
 #include <tracy/Tracy.hpp>
 
@@ -243,15 +244,6 @@ void Game::init() {
 		traderComponent.purchaseOffers.emplace(entity, i);
 	}
 
-	entt::entity brick = pRegistry->create();
-	pRegistry->emplace<Brick>(brick);
-	pRegistry->emplace<Item>(brick, Item("brick"));
-	entt::entity brickDeposit = pRegistry->create();
-	pRegistry->emplace<ResourceDeposit>(brickDeposit, ResourceDeposit(brick, 100));
-	pRegistry->emplace<Transform>(brickDeposit).position = glm::vec3(0, 0, 10);
-	pRegistry->emplace<Properties>(brickDeposit);
-	pRegistry->emplace<ModelRequest>(brickDeposit, ModelRequest("dev", "brick_cube"));
-
 	entt::entity tree = pRegistry->create();
 	pRegistry->emplace<Properties>(tree);
 	Transform& treeTransform = pRegistry->emplace<Transform>(tree);
@@ -266,8 +258,17 @@ void Game::init() {
 	pRegistry->emplace<Connections>(tree).outputs.emplace(ConnectionResourceType::LATEX, connection);
 	pRegistry->emplace<Tree>(tree);
 
+	// drone
+	entt::entity droneEntity = pRegistry->create();
+	Drone drone = {.name = "cat", .speed = 5};
+	pRegistry->emplace<Drone>(droneEntity, drone);
+	pRegistry->emplace<Transform>(droneEntity).position = glm::vec3(0, 10, 0);
+	pRegistry->emplace<Properties>(droneEntity);
+	pRegistry->emplace<ModelRequest>(droneEntity, ModelRequest("dev", "brick_cube"));
+
+	// cable
 	glm::vec3 cablePos(5, 20, 0);
-	int numberOfSegments = 100;
+	int numberOfSegments = 50;
 	float segmentInterval = 1;
 	float particleMass = 0.1;
 
@@ -280,6 +281,7 @@ void Game::init() {
 			.inverseInertia = glm::vec3(0, 0, 0),
 			.rotation = glm::vec3(0, 0, 0),
 			.position = cablePos + glm::vec3(i * segmentInterval, 0, 0)};
+
 		cable.particles.push_back(particle);
 
 		if (i > 0) {

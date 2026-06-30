@@ -2,6 +2,7 @@
 
 #include <entt/entt.hpp>
 
+#include "game/control/drone_control_system.h"
 #include "mouse_raycast_system.h"
 #include "selection_system.h"
 #include "lc_client/eng_input/i_input.h"
@@ -23,8 +24,7 @@
 class ControlSystem {
 public:
 	ControlSystem(GraphicsSettings* pSettings, IInput* pInput, Camera* pCamera, ActionControl* pActionControl,
-		Physics* pPhysics, PointerOverGui* pPointerOverGui, 
-		entt::registry* pRegistry);
+		Physics* pPhysics, PointerOverGui* pPointerOverGui, entt::registry* pRegistry);
 	~ControlSystem();
 
 	void input(double deltaTime);
@@ -39,6 +39,7 @@ private:
 	AgricultureControlSystem m_agricultureControlSystem;
 	TradeControlSystem m_tradeControlSystem;
 	DepositControlSystem m_depositControlSystem;
+	DroneControlSystem m_droneControlSystem;
 
 	CameraController* m_pCameraController = nullptr;
 };

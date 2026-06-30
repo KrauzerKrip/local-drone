@@ -6,32 +6,33 @@
 ControlSystem::ControlSystem(GraphicsSettings* pSettings, IInput* pInput, Camera* pCamera,
 	ActionControl* pActionControl, Physics* pPhysics, PointerOverGui* pPointerOverGui, entt::registry* pRegistry)
 	: m_mouseRaycast(pPhysics, pSettings, pInput, pCamera, pActionControl, pRegistry),
-	m_selectionSystem(pRegistry),
+	  m_selectionSystem(pRegistry),
 	  m_characterControlSystem(pRegistry),
 	  m_machineControlSystem(&m_mouseRaycast, pActionControl, pRegistry),
 	  m_mouseRaycastSystem(&m_mouseRaycast, pActionControl, pPointerOverGui),
-	  m_agricultureControlSystem(pRegistry), m_tradeControlSystem(pRegistry),
-	  m_depositControlSystem(pRegistry) {
+	  m_agricultureControlSystem(pRegistry),
+	  m_tradeControlSystem(pRegistry),
+	  m_depositControlSystem(pRegistry),
+	  m_droneControlSystem(&m_mouseRaycast, pActionControl, pRegistry) {
 
 	m_pCameraController = new OrbitalCameraController(pCamera, pInput, pActionControl);
 
-	m_mouseRaycastSystem.addObserver("kb_select", & m_selectionSystem);
+	m_mouseRaycastSystem.addObserver("kb_select", &m_selectionSystem);
 	m_mouseRaycastSystem.addObserver("kb_select", &m_characterControlSystem);
-	m_mouseRaycastSystem.addObserver("kb_select", & m_machineControlSystem);
+	m_mouseRaycastSystem.addObserver("kb_select", &m_machineControlSystem);
 	m_mouseRaycastSystem.addObserver("kb_build", &m_machineControlSystem);
 	m_mouseRaycastSystem.addObserver("kb_build", &m_agricultureControlSystem);
 	m_mouseRaycastSystem.addObserver("kb_select", &m_tradeControlSystem);
 	m_mouseRaycastSystem.addObserver("kb_build", &m_depositControlSystem);
 }
 
-ControlSystem::~ControlSystem() {
-	delete m_pCameraController;
-}
+ControlSystem::~ControlSystem() { delete m_pCameraController; }
 
-void ControlSystem::input(double deltaTime) { 
+void ControlSystem::input(double deltaTime) {
 	m_pCameraController->input(deltaTime);
 	m_mouseRaycastSystem.input();
 	m_machineControlSystem.input();
+	m_droneControlSystem.input(deltaTime);
 }
 
 void ControlSystem::update(double updateInterval) {}
