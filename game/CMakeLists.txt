@@ -4,9 +4,18 @@ project(game)
 
 include(GNUInstallDirs)
 
-add_executable(game_exe "src/game/main.cpp" "src/game/main.h" )
+add_executable(game_exe "src/game/main.cpp" "src/game/main.h")
 add_library(game STATIC)
-target_sources(game PRIVATE "src/game/game.cpp" "src/game/game.h" "src/game/graphics.h" "src/game/graphics.cpp" "src/game/game_systems.h" "src/game/game_systems.cpp" "src/game/game_conpars_init.h" "src/game/game_conpars_init.cpp")
+target_sources(
+  game
+  PRIVATE "src/game/game.cpp"
+          "src/game/game.h"
+          "src/game/graphics.h"
+          "src/game/graphics.cpp"
+          "src/game/game_systems.h"
+          "src/game/game_systems.cpp"
+          "src/game/game_conpars_init.h"
+          "src/game/game_conpars_init.cpp")
 
 add_subdirectory("src/game/gui")
 add_subdirectory("src/game/loader_fabric")
@@ -21,17 +30,14 @@ add_subdirectory("src/game/economy")
 add_subdirectory("src/game/resource")
 add_subdirectory("src/game/util")
 add_subdirectory("src/game/cable")
+add_subdirectory("src/game/drone")
 
-target_include_directories(game
-    PUBLIC
-        $<INSTALL_INTERFACE:/src>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
-)
+target_include_directories(
+  game PUBLIC $<INSTALL_INTERFACE:/src>
+              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
 
 target_link_libraries(game_exe PRIVATE game)
 
 add_subdirectory("test")
 
-install(TARGETS game_exe
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
+install(TARGETS game_exe RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

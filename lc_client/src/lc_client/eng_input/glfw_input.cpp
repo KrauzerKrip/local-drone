@@ -59,6 +59,11 @@ InputGlfw::InputGlfw() {
 	m_keyMap.emplace(KeyCode::F11, GLFW_KEY_F11);
 	m_keyMap.emplace(KeyCode::F12, GLFW_KEY_F12);
 
+	m_keyMap.emplace(KeyCode::ARROW_UP, GLFW_KEY_UP);
+	m_keyMap.emplace(KeyCode::ARROW_LEFT, GLFW_KEY_LEFT);
+	m_keyMap.emplace(KeyCode::ARROW_RIGHT, GLFW_KEY_RIGHT);
+	m_keyMap.emplace(KeyCode::ARROW_DOWN, GLFW_KEY_DOWN);
+
 	for (auto& [k, v] : m_keyMap) {
 		m_keyStates.emplace(k, false);
 	}

@@ -34,6 +34,12 @@
 		"kb_machine_menu": "Q",
 		"kb_rotate_blueprint": "R",
 		"kb_remove_blueprint": "Z",
+		"kb_drone_forward": "ARROW_UP",
+		"kb_drone_back": "ARROW_DOWN",
+		"kb_drone_left": "ARROW_LEFT",
+		"kb_drone_right": "ARROW_RIGHT",
+		"kb_drone_up": "T",
+		"kb_drone_down": "G",
 
 		"game_combustion_heat_diesel": "43400000.0",
 		"game_combustion_heat_anthracite": "32500000.0",

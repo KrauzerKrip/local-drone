@@ -4,22 +4,23 @@
 #include "lc_client/exceptions/input_exceptions.h"
 #include "lc_client/exceptions/conpar_exceptions.h"
 
-ActionBind::ActionBind(
-	Parameters* pParameters, IConsole* pConsole, KeyCodeStrings* pKeyCodeStrings) {
-	std::vector actions = std::vector<std::string>({"kb_forward", "kb_left", "kb_back", "kb_right", "kb_up", "kb_fast", "kb_down", "kb_use", "kb_menu", "kb_build",
-			"kb_select", "kb_rotate_camera", "kb_machine_menu", "kb_rotate_blueprint", "kb_remove_blueprint"});
+ActionBind::ActionBind(Parameters* pParameters, IConsole* pConsole, KeyCodeStrings* pKeyCodeStrings) {
+	std::vector actions = std::vector<std::string>(
+		{"kb_forward", "kb_left", "kb_back", "kb_right", "kb_up", "kb_fast", "kb_down", "kb_use", "kb_menu", "kb_build",
+			"kb_select", "kb_rotate_camera", "kb_machine_menu", "kb_rotate_blueprint", "kb_remove_blueprint",
+			"kb_drone_forward", "kb_drone_back", "kb_drone_left", "kb_drone_right", "kb_drone_up", "kb_drone_down"});
 
 	for (std::string action : actions) {
 		ConPar<std::string> conpar(action, "");
 
 		std::string key = conpar.getValue();
-		
+
 		m_actionBinds.emplace(action, KeyCode::NONE);
 
-		conpar.setCallback(
-			[this, action = action, pKeyCodeStrings = pKeyCodeStrings, pConsole = pConsole](std::string value) {
+		conpar.setCallback([this, action = action, pKeyCodeStrings = pKeyCodeStrings, pConsole = pConsole](
+							   std::string value) {
 			try {
-                KeyCode keyCode = pKeyCodeStrings->getKeyCode(value);
+				KeyCode keyCode = pKeyCodeStrings->getKeyCode(value);
 				m_actionBinds[action] = keyCode;
 			}
 			catch (UnknownKeyCodeException& exception) {
@@ -27,9 +28,9 @@ ActionBind::ActionBind(
 								  "\nIf this error appears at startup take a look at info.json 'game_config' keybinds.";
 				pConsole->warn(str);
 			}
-			});
+		});
 
-	    pParameters->addParameter(conpar);
+		pParameters->addParameter(conpar);
 	}
 }
 
