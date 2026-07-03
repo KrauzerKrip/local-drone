@@ -10,6 +10,7 @@
 #include <glm/glm.hpp>
 
 #include "game/cable/cable_system.h"
+#include "game/cable/components.h"
 #include "ldk_client/local_engine/time.h"
 #include "lc_client/eng_graphics/opengl/gl_render.h"
 #include "lc_client/util/eng_resource.h"
@@ -268,9 +269,9 @@ void Game::init() {
 
 	// cable
 	glm::vec3 cablePos(5, 20, 0);
-	int numberOfSegments = 50;
+	int numberOfSegments = 25;
 	float segmentInterval = 1;
-	float particleMass = 0.1;
+	float particleMass = 0.001;
 
 	Cable cable;
 	CableParticle* pPrevParticle = nullptr;
@@ -282,6 +283,9 @@ void Game::init() {
 			.rotation = glm::vec3(0, 0, 0),
 			.position = cablePos + glm::vec3(i * segmentInterval, 0, 0)};
 		if (i == 0) {
+			particle.attachment = CableParticleAttachment{.anchor = trader, .offset = glm::vec3(0, 1, 0)};
+		}
+		if (i == numberOfSegments - 1) {
 			particle.attachment = CableParticleAttachment{.anchor = droneEntity, .offset = glm::vec3(0, -1, 0)};
 		}
 		cable.particles.push_back(particle);
@@ -289,21 +293,25 @@ void Game::init() {
 		if (i > 0) {
 			auto& prevParticle = cable.particles[i - 1];
 			size_t i_size_t = static_cast<size_t>(i);
-			CableDistanceConstraint constraint{
-				.indexParticleA = i_size_t - 1,
+			CableDistanceConstraint constraint{.indexParticleA = i_size_t - 1,
 				.indexParticleB = i_size_t,
 				.lambda = 0,
 				.restDistance = segmentInterval,
 				.compliance = 0.0f,
-			};
+				.maxTension = 0.0f};
 
 			cable.constraints.push_back(constraint);
 		}
 	}
 	cable.coloredConstraintsDirty = true;
 
+	Spool spool = {.maxLength = 100.0f};
+	CableProperties cableProperties = {.segmentInterval = segmentInterval};
+
 	entt::entity cableEntity = pRegistry->create();
 	pRegistry->emplace<Cable>(cableEntity, cable);
+	pRegistry->emplace<Spool>(cableEntity, spool);
+	pRegistry->emplace<CableProperties>(cableEntity, cableProperties);
 }
 
 void Game::input(double deltaTime) {

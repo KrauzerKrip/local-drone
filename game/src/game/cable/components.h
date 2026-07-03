@@ -1,3 +1,5 @@
+#pragma once
+
 #include "lc_client/eng_physics/physics.h"
 #include "lc_client/eng_scene/entt/components.h"
 #include <cstddef>
@@ -72,4 +74,12 @@ struct Cable {
 	std::vector<glm::vec3> particleCollisionNormalScratch;
 
 	float currentLength;
+};
+
+struct CableProperties {
+	float segmentInterval;
+};
+
+struct Spool {
+	float maxLength;
 };
