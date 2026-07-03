@@ -9,7 +9,8 @@ GameSystems::GameSystems(entt::registry* pRegistry, eng::IResource* pResource, P
 	  m_inventorySystem(pRegistry),
 	  m_tradeSystem(pRegistry),
 	  m_depositSystem(pRegistry, pConsole),
-	  m_cableSystem(pPhysics, pRegistry) {}
+	  m_cableSystem(pPhysics, pRegistry),
+	  m_spoolSystem(pPhysics, pRegistry) {}
 
 void GameSystems::input(double deltaTime) {
 	m_characterSystem.input();
@@ -24,6 +25,7 @@ void GameSystems::update(double updateInterval) {
 	m_depositSystem.update(updateInterval);
 	m_inventorySystem.update();
 	m_cableSystem.update(updateInterval);
+	m_spoolSystem.update(updateInterval);
 }
 
 void GameSystems::machineUpdate(double updateInterval) {

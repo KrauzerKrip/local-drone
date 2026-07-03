@@ -3,6 +3,7 @@
 #include <entt/entt.hpp>
 
 #include "game/cable/cable_system.h"
+#include "game/cable/spool_system.h"
 #include "lc_client/eng_physics/physics.h"
 #include "lc_client/util/i_eng_resource.h"
 #include "machine/physics/physical_constants.h"
@@ -34,4 +35,5 @@ private:
 	TradeSystem m_tradeSystem;
 	DepositSystem m_depositSystem;
 	CableSystem m_cableSystem;
+	SpoolSystem m_spoolSystem;
 };
