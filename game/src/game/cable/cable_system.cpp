@@ -98,6 +98,11 @@ void CableSystem::update(double updateInterval) {
 		cable.particleCollisionNormalScratch.resize(cable.particles.size());
 		auto& particleHadCollision = cable.particleHadCollisionScratch;
 		auto& particleCollisionNormal = cable.particleCollisionNormalScratch;
+
+		for (CableDistanceConstraint& constraint : cable.constraints) {
+			constraint.maxTension = 0.0f;
+		}
+
 		for (int substep = 0; substep < substeps; substep++) {
 			ZoneScopedN("CableSystem::substep");
 
@@ -257,6 +262,17 @@ void CableSystem::update(double updateInterval) {
 			}
 
 			{
+				ZoneScopedN("CableSystem::update tension");
+				for (CableDistanceConstraint& constraint : cable.constraints) {
+					float signedForce = constraint.lambda / (deltaTime * deltaTime);
+
+					// For C = length - restLength:
+					float tension = std::max(0.0f, -signedForce);
+					constraint.maxTension = std::max(constraint.maxTension, tension);
+				}
+			}
+
+			{
 				ZoneScopedN("CableSystem::update velocities");
 
 				for (size_t i = 0; i < cable.particles.size(); i++) {
@@ -280,6 +296,16 @@ void CableSystem::update(double updateInterval) {
 		}
 
 		{
+			ZoneScopedN("CableSystem::calculate cable length");
+			cable.currentLength = 0.0f;
+			for (size_t i = 1; i < cable.particles.size(); i++) {
+				auto& particleA = cable.particles[i - 1];
+				auto& particleB = cable.particles[i];
+				cable.currentLength += glm::distance(particleA.position, particleB.position);
+			}
+		}
+
+		{
 			ZoneScopedN("CableSystem::sync primitive lines");
 
 			if (m_pRegistry->any_of<PrimitiveLines>(entity)) {
@@ -292,6 +318,17 @@ void CableSystem::update(double updateInterval) {
 					auto& particleB = cable.particles[i];
 					lines.lines[i - 1].startPoint = particleA.position;
 					lines.lines[i - 1].endPoint = particleB.position;
+					auto& constraint = cable.constraints[i - 1];
+					float breakForce = 50.0f;
+
+					float t = glm::clamp(constraint.maxTension / breakForce, 0.0f, 1.0f);
+					glm::vec3 low = glm::vec3(0.0f, 0.2f, 1.0f);  // blue
+					glm::vec3 mid = glm::vec3(1.0f, 1.0f, 0.0f);  // yellow
+					glm::vec3 high = glm::vec3(1.0f, 0.0f, 0.0f); // red
+
+					glm::vec3 color = t < 0.5f ? glm::mix(low, mid, t * 2.0f) : glm::mix(mid, high, (t - 0.5f) * 2.0f);
+
+					lines.lines[i - 1].color = glm::vec4(color, 1.0f);
 				}
 			}
 			else {
@@ -357,7 +394,7 @@ glm::vec3 CableSystem::calculateDistanceConstraint(
 	}
 
 	const float deltaLambda = (-c - alpha * constraint.lambda) / (inverseMassSum + alpha);
-	constraint.lambda += deltaLambda;
+	constraint.lambda += deltaLambda; // a side effect in "calculate" method!!!
 
 	const glm::vec3 correction = deltaLambda * normal;
 	return -correction; // now with "-" sign when the cable is too long, A moves toward B, and B moves toward A.

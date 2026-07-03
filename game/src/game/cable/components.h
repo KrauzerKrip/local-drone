@@ -44,6 +44,7 @@ struct CableDistanceConstraint {
 	float lambda;
 	float restDistance;
 	float compliance;
+	float maxTension; // max tension over substeps
 };
 
 struct CableCollisionConstraint {
@@ -69,4 +70,6 @@ struct Cable {
 	std::vector<size_t> particleColliderCandidateIndices;
 	std::vector<bool> particleHadCollisionScratch;
 	std::vector<glm::vec3> particleCollisionNormalScratch;
+
+	float currentLength;
 };
