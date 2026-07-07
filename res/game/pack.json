@@ -1,1 +1,18 @@
-{"models":{"bush":"game/models/bush/","cat":"game/models/cat/","heater":"game/models/heater/","latex_extractor":"game/models/latex_extractor/","tree":"game/models/tree/"},"pack":"game","shaders":{"fragment":{"blueprint":"game/shaders/frag/blueprint.frag"},"vertex":{}},"skyboxes":{}}
+{
+	"models": {
+		"drone": "game/models/drone/",
+		"bush": "game/models/bush/",
+		"cat": "game/models/cat/",
+		"heater": "game/models/heater/",
+		"latex_extractor": "game/models/latex_extractor/",
+		"tree": "game/models/tree/"
+	},
+	"pack": "game",
+	"shaders": {
+		"fragment": {
+			"blueprint": "game/shaders/frag/blueprint.frag"
+		},
+		"vertex": {}
+	},
+	"skyboxes": {}
+}
