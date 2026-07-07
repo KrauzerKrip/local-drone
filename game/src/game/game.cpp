@@ -11,6 +11,7 @@
 
 #include "game/cable/cable_system.h"
 #include "game/cable/components.h"
+#include "lc_client/eng_scene/entt/components.h"
 #include "ldk_client/local_engine/time.h"
 #include "lc_client/eng_graphics/opengl/gl_render.h"
 #include "lc_client/util/eng_resource.h"
@@ -263,9 +264,12 @@ void Game::init() {
 	entt::entity droneEntity = pRegistry->create();
 	Drone drone = {.name = "cat", .speed = 5};
 	pRegistry->emplace<Drone>(droneEntity, drone);
-	pRegistry->emplace<Transform>(droneEntity).position = glm::vec3(0, 10, 0);
+	Transform transform;
+	transform.position = glm::vec3(0, 10, 0);
+	transform.scale = glm::vec3(0.70, 0.25, 0.25);
+	pRegistry->emplace<Transform>(droneEntity, transform);
 	pRegistry->emplace<Properties>(droneEntity);
-	pRegistry->emplace<ModelRequest>(droneEntity, ModelRequest("dev", "brick_cube"));
+	pRegistry->emplace<ModelRequest>(droneEntity, ModelRequest("game", "drone"));
 
 	// cable
 	glm::vec3 cablePos(5, 20, 0);
