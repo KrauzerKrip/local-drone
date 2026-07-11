@@ -1,16 +1,16 @@
 #include "game_systems.h"
 
 
-GameSystems::GameSystems(entt::registry* pRegistry, eng::IResource* pResource, Physics* pPhysics,
-	PhysicalConstants* pPhysicalConstants, IConsole* pConsole, Parameters* pParameters)
-	: m_characterSystem(pRegistry),
-	  m_machineSystem(pResource, pRegistry, pPhysicalConstants, pParameters),
-	  m_agricultureSystem(pRegistry),
-	  m_inventorySystem(pRegistry),
-	  m_tradeSystem(pRegistry),
-	  m_depositSystem(pRegistry, pConsole),
-	  m_cableSystem(pPhysics, pRegistry),
-	  m_spoolSystem(pPhysics, pRegistry) {}
+GameSystems::GameSystems(World* pWorld, eng::IResource* pResource, PhysicalConstants* pPhysicalConstants,
+	IConsole* pConsole, Parameters* pParameters)
+	: m_characterSystem(pWorld->getRegistry()),
+	  m_machineSystem(pResource, pWorld->getRegistry(), pPhysicalConstants, pParameters),
+	  m_agricultureSystem(pWorld->getRegistry()),
+	  m_inventorySystem(pWorld->getRegistry()),
+	  m_tradeSystem(pWorld->getRegistry()),
+	  m_depositSystem(pWorld->getRegistry(), pConsole),
+	  m_cableSystem(pWorld),
+	  m_spoolSystem(pWorld) {}
 
 void GameSystems::input(double deltaTime) {
 	m_characterSystem.input();

@@ -4,6 +4,7 @@
 #include <entt/entt.hpp>
 #include "components.h"
 #include "lc_client/eng_physics/physics.h"
+#include "lc_client/eng_world/world.h"
 
 struct CableBounds {
 	glm::vec3 position;
@@ -12,7 +13,7 @@ struct CableBounds {
 
 class CableSystem {
 public:
-	CableSystem(Physics* pPhysics, entt::registry* pRegistry);
+	CableSystem(World* pWorld);
 
 	void update(double updateInterval);
 

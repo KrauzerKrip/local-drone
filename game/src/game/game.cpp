@@ -86,7 +86,7 @@ Game::Game(IWindow* pWindow, Tier0* pTier0, std::filesystem::path resourceDir) {
 			m_pInput, m_pGraphics->getTextureManager(), m_pGraphics->getFramebufferController(), m_pWindow, fontPath);
 
 	m_pGui = new Gui(pGuiPresenter, m_pTier0, pGuiDependenciesFabric, m_pInput, m_pActionControl,
-		m_pGraphics->getSettings(), m_pCamera, &m_pWorld->getRegistry());
+		m_pGraphics->getSettings(), m_pCamera, m_pWorld->getRegistry());
 
 	m_pWindow->setCreationCallback([this, pGuiDependenciesFabric]() {
 		m_pGraphics->init();
@@ -100,20 +100,20 @@ Game::Game(IWindow* pWindow, Tier0* pTier0, std::filesystem::path resourceDir) {
 
 	m_pTier1->initGameConfig();
 
-	m_pScriptSystem = new ScriptSystem(&m_pWorld->getRegistry());
-	Physics* pPhysics = new Physics(&m_pWorld->getRegistry());
-	PhysicsLoader* pPhysicsLoader = new PhysicsLoader(new PhysicsParser(m_pResource), &m_pWorld->getRegistry());
+	m_pScriptSystem = new ScriptSystem(m_pWorld->getRegistry());
+	Physics* pPhysics = new Physics(m_pWorld->getRegistry());
+	PhysicsLoader* pPhysicsLoader = new PhysicsLoader(new PhysicsParser(m_pResource), m_pWorld->getRegistry());
 
 	m_pPhysicsSystem = new PhysicsSystem(
-		pPhysics, pPhysicsLoader, pTier0->getParameters(), &m_pWorld->getRegistry(), m_pTier0->getConsole());
+		pPhysics, pPhysicsLoader, pTier0->getParameters(), m_pWorld->getRegistry(), m_pTier0->getConsole());
 
 	m_pNpcSystem = new NpcSystem(m_pTier0->getParameters(), m_pWorld);
 
 	m_pControlSystem = new ControlSystem(m_pGraphics->getSettings(), m_pInput, m_pCamera, m_pActionControl, pPhysics,
-		m_pGui->getPointerOverGui(), &m_pWorld->getRegistry());
+		m_pGui->getPointerOverGui(), m_pWorld->getRegistry());
 
-	m_pGameSystems = new GameSystems(&m_pWorld->getRegistry(), m_pResource, pPhysics, pPhysicalConstants,
-		m_pTier0->getConsole(), m_pTier0->getParameters());
+	m_pGameSystems =
+		new GameSystems(m_pWorld, m_pResource, pPhysicalConstants, m_pTier0->getConsole(), m_pTier0->getParameters());
 }
 
 Game::~Game() {
@@ -129,11 +129,11 @@ void Game::init() {
 	m_pWorld->loadMap("dev", "test");
 	m_pWorld->loadScene("dev", "test");
 
-	entt::entity skyboxEntity = m_pWorld->getRegistry().create();
+	entt::entity skyboxEntity = m_pWorld->getRegistry()->create();
 	// m_pWorld->getRegistry().emplace<SkyboxRequest>(skyboxEntity, SkyboxRequest("dev", "anime"));
 
-	auto dirLight = m_pWorld->getRegistry().create(); // temp
-	auto& dirLightComponent = m_pWorld->getRegistry().emplace<DirectionalLight>(dirLight);
+	auto dirLight = m_pWorld->getRegistry()->create(); // temp
+	auto& dirLightComponent = m_pWorld->getRegistry()->emplace<DirectionalLight>(dirLight);
 	dirLightComponent.color = glm::vec3(1, 1, 1);
 	dirLightComponent.direction = glm::vec3(-0.2f, -1.0f, -0.3f);
 
@@ -195,7 +195,7 @@ void Game::init() {
 
 	m_pWindow->setCursorMode(CursorMode::CURSOR_ENABLED);
 
-	auto pRegistry = &m_pWorld->getRegistry();
+	auto pRegistry = m_pWorld->getRegistry();
 	auto view = pRegistry->view<Properties>();
 
 	for (auto&& [entity, properties] : view.each()) {
@@ -354,7 +354,7 @@ void Game::input(double deltaTime) {
 }
 
 void Game::update(double updateInterval) {
-	entt::registry* pRegistry = &m_pWorld->getRegistry();
+	entt::registry* pRegistry = m_pWorld->getRegistry();
 
 	entt::entity surface;
 	entt::entity surfaceScene;
@@ -374,7 +374,7 @@ void Game::update(double updateInterval) {
 	m_pGameSystems->machineUpdate(updateInterval);
 	m_pGraphics->getSystems()->update();
 
-	auto skyboxes = m_pWorld->getRegistry().view<Skybox>();
+	auto skyboxes = m_pWorld->getRegistry()->view<Skybox>();
 
 	for (auto&& [entity, skybox] : skyboxes.each()) {
 		skybox.lightColor = glm::vec3(1, 1, 0.7);

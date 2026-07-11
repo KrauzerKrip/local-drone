@@ -4,10 +4,11 @@
 #include <entt/entt.hpp>
 #include "components.h"
 #include "lc_client/eng_physics/physics.h"
+#include "lc_client/eng_world/world.h"
 
 class SpoolSystem {
 public:
-	SpoolSystem(Physics* pPhysics, entt::registry* pRegistry);
+	SpoolSystem(World* pWorld);
 
 	void update(double updateInterval);
 

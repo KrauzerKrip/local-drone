@@ -14,15 +14,15 @@
 
 
 ModelManager::ModelManager(
-	TextureManager* pTextureManager,
-	eng::IResource* pResource, entt::registry& pUtilRegistry, IConsole* pConsole) {
+	TextureManager* pTextureManager, eng::IResource* pResource, entt::registry* pUtilRegistry, IConsole* pConsole) {
 	m_pTextureManager = pTextureManager;
 	m_pResource = pResource;
-	m_pUtilRegistry = &pUtilRegistry;
+	m_pUtilRegistry = pUtilRegistry;
 	m_pConsole = pConsole;
 }
 
-Model* ModelManager::getModel(const std::string modelPath, const std::string texturesDirPath, const std::string materialType) {
+Model* ModelManager::getModel(
+	const std::string modelPath, const std::string texturesDirPath, const std::string materialType) {
 	try {
 		return m_modelMap.at(modelPath);
 	}
@@ -32,14 +32,14 @@ Model* ModelManager::getModel(const std::string modelPath, const std::string tex
 	}
 }
 
-Model* ModelManager::loadModel(const std::string modelPath, const std::string texturesDirPath, const std::string materialType) {
+Model* ModelManager::loadModel(
+	const std::string modelPath, const std::string texturesDirPath, const std::string materialType) {
 	Model* pModel = nullptr;
 
 	bool success = false;
 
 	try {
-		eng::ModelLoading modelLoading(
-			modelPath, FILE_FORMAT, m_pResource, m_pUtilRegistry);
+		eng::ModelLoading modelLoading(modelPath, FILE_FORMAT, m_pResource, m_pUtilRegistry);
 		pModel = modelLoading.loadModel();
 
 		success = true;
@@ -48,16 +48,14 @@ Model* ModelManager::loadModel(const std::string modelPath, const std::string te
 		LE_CORE_WARN("Resource not found for model {}: {}", modelPath, exception.what());
 
 		// "gmod vibe" here just to occur exception and load black-purple textures
-		eng::ModelLoading modelLoading(
-			ERROR_MODEL_PATH, FILE_FORMAT, m_pResource, m_pUtilRegistry);
+		eng::ModelLoading modelLoading(ERROR_MODEL_PATH, FILE_FORMAT, m_pResource, m_pUtilRegistry);
 		pModel = modelLoading.loadModel();
 	}
 	catch (AssimpException& exception) {
-	    LE_CORE_WARN("Failed to load model {}: {}", modelPath, exception.what());
+		LE_CORE_WARN("Failed to load model {}: {}", modelPath, exception.what());
 
 		// "gmod vibe" here just to occur exception and load black-purple textures
-		eng::ModelLoading modelLoading(
-			ERROR_MODEL_PATH, FILE_FORMAT, m_pResource, m_pUtilRegistry);
+		eng::ModelLoading modelLoading(ERROR_MODEL_PATH, FILE_FORMAT, m_pResource, m_pUtilRegistry);
 
 		pModel = modelLoading.loadModel();
 	}
@@ -70,7 +68,7 @@ Model* ModelManager::loadModel(const std::string modelPath, const std::string te
 	m_modelMap.emplace(modelPath, pModel);
 
 	if (success) {
-	    LE_CORE_DEBUG("Model '{}' loaded", modelPath);
+		LE_CORE_DEBUG("Model '{}' loaded", modelPath);
 	}
 	else {
 		LE_CORE_WARN("Model '" + modelPath + " wasn`t loaded successfully. Set default instead.");

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <unordered_map> 
+#include <unordered_map>
 
 #include <entt/entt.hpp>
 
@@ -13,11 +13,11 @@ class ModelManager {
 
 public:
 	ModelManager(
-		TextureManager* pTextureManager, eng::IResource* pResource, entt::registry& pUtilRegistry, IConsole* pConsole);
+		TextureManager* pTextureManager, eng::IResource* pResource, entt::registry* pUtilRegistry, IConsole* pConsole);
 
 	Model* getModel(const std::string modelPath, const std::string texturesDirPath, const std::string materialType);
 
-private :
+private:
 	Model* loadModel(const std::string modelPath, const std::string texturesDirPath, const std::string materialType);
 
 	std::unordered_map<std::string, Model*> m_modelMap;

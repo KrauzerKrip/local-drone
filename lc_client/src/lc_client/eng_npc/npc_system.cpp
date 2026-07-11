@@ -7,10 +7,10 @@
 #include <iostream>
 
 
-NpcSystem::NpcSystem(Parameters* pParameters, World* pWorld) { 
+NpcSystem::NpcSystem(Parameters* pParameters, World* pWorld) {
 	m_pParameters = pParameters;
 	m_pWorld = pWorld;
-	m_pRegistry = &pWorld->getRegistry();
+	m_pRegistry = pWorld->getRegistry();
 	m_pNpcGraph = pWorld->getNpcGraph();
 
 	m_pRegistry->on_update<Waypoint>().connect<&NpcSystem::createPath>(this);
@@ -33,7 +33,8 @@ void NpcSystem::update() {
 			if (glm::distance(path.endPoint, transform.position) > 0.01f) {
 				glm::vec3 direction = glm::normalize(path.endPoint - transform.position);
 				transform.position = transform.position + speed * direction;
-			} else {
+			}
+			else {
 				m_pRegistry->remove<NpcPath>(entity);
 			}
 		}
@@ -61,4 +62,3 @@ void NpcSystem::createPath(entt::registry& registry, entt::entity entity) {
 		registry.emplace_or_replace<NpcPath>(entity, path, waypoint.position);
 	}
 }
-

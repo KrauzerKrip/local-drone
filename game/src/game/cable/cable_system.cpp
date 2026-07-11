@@ -11,6 +11,7 @@
 #include "lc_client/eng_physics/entt/components.h"
 #include "lc_client/eng_physics/physics.h"
 #include "lc_client/eng_scene/entt/components.h"
+#include "lc_client/eng_world/world.h"
 #include "lc_client/exceptions/component_exception.h"
 #include <limits>
 
@@ -67,9 +68,9 @@ namespace {
 	}
 }
 
-CableSystem::CableSystem(Physics* pPhysics, entt::registry* pRegistry) {
-	m_pPhysics = pPhysics;
-	m_pRegistry = pRegistry;
+CableSystem::CableSystem(World* pWorld) {
+	m_pPhysics = pWorld->getPhysics();
+	m_pRegistry = pWorld->getRegistry();
 	m_gravity = 9.81;
 }
 

@@ -19,8 +19,8 @@
 
 class GameSystems {
 public:
-	GameSystems(entt::registry* pRegistry, eng::IResource* pResource, Physics* pPhysics,
-		PhysicalConstants* pPhysicalConstants, IConsole* pConsole, Parameters* pParameters);
+	GameSystems(World* pWorld, eng::IResource* pResource, PhysicalConstants* pPhysicalConstants, IConsole* pConsole,
+		Parameters* pParameters);
 
 	void input(double deltaTime);
 	void update(double updateInterval);

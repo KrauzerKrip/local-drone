@@ -1,10 +1,11 @@
 #include "world.h"
 
 #include "lc_client/eng_map/entt/components.h"
+#include "lc_client/eng_physics/physics.h"
 
 
 
-World::World(eng::IResource* pResource, SceneLoading* pSceneLoading) {
+World::World(eng::IResource* pResource, SceneLoading* pSceneLoading) : m_physics(&m_registry) {
 	m_pResource = pResource;
 	m_pSceneLoading = pSceneLoading;
 }
@@ -12,12 +13,12 @@ World::World(eng::IResource* pResource, SceneLoading* pSceneLoading) {
 World::~World() {}
 
 void World::loadScene(std::string pack, std::string scene) {
-    for(auto entity: m_registry.view<entt::entity>()) {
-        if (!m_registry.all_of<MapEntity>(entity)) {
+	for (auto entity : m_registry.view<entt::entity>()) {
+		if (!m_registry.all_of<MapEntity>(entity)) {
 			m_registry.destroy(entity);
 		}
-    }
-    for(auto entity: m_registry.view<entt::entity>()) {
+	}
+	for (auto entity : m_registry.view<entt::entity>()) {
 		if (!m_utilRegistry.all_of<MapEntity>(entity)) {
 			m_utilRegistry.destroy(entity);
 		}
@@ -35,8 +36,10 @@ void World::loadMap(std::string pack, std::string map) {
 	m_npcGraph = std::make_unique<NpcGraph>(*pNpcGraph);
 }
 
-entt::registry& World::getRegistry() { return m_registry; }
+entt::registry* World::getRegistry() { return &m_registry; }
 
-entt::registry& World::getUtilRegistry() { return m_utilRegistry; }
+entt::registry* World::getUtilRegistry() { return &m_utilRegistry; }
 
 NpcGraph* World::getNpcGraph() { return m_npcGraph.get(); }
+
+Physics* World::getPhysics() { return &m_physics; }

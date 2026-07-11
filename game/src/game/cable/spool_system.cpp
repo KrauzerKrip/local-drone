@@ -5,9 +5,9 @@
 #include <cstddef>
 #include <optional>
 
-SpoolSystem::SpoolSystem(Physics* pPhysics, entt::registry* pRegistry) {
-	m_pPhysics = pPhysics;
-	m_pRegistry = pRegistry;
+SpoolSystem::SpoolSystem(World* pWorld) {
+	m_pPhysics = pWorld->getPhysics();
+	m_pRegistry = pWorld->getRegistry();
 }
 
 void SpoolSystem::update(double updateInterval) {

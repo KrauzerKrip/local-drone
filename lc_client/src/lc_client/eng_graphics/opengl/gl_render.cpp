@@ -113,8 +113,8 @@ void RenderGL::clear() {}
 void RenderGL::cleanUp() {}
 
 void RenderGL::setDependecies(World* pWorld) {
-	m_pRegistry = &pWorld->getRegistry();
-	m_pUtilRegistry = &pWorld->getUtilRegistry();
+	m_pRegistry = pWorld->getRegistry();
+	m_pUtilRegistry = pWorld->getUtilRegistry();
 
 	m_pLighting = new LightingGl(m_pRegistry, m_pCamera);
 

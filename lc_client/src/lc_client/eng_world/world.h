@@ -6,6 +6,7 @@
 #include "lc_client/eng_scene/scene_loading.h"
 #include "lc_client/eng_npc/npc_graph.h"
 #include "lc_client/eng_npc/npc_graph_loader/npc_graph_loader.h"
+#include "lc_client/eng_physics/physics.h"
 
 
 class World {
@@ -16,9 +17,10 @@ public:
 	void loadScene(std::string pack, std::string scene);
 	void loadMap(std::string pack, std::string map);
 
-	entt::registry& getRegistry();
-	entt::registry& getUtilRegistry();
+	entt::registry* getRegistry();
+	entt::registry* getUtilRegistry();
 	NpcGraph* getNpcGraph();
+	Physics* getPhysics();
 
 private:
 	entt::registry m_registry;
@@ -28,4 +30,5 @@ private:
 
 	SceneLoading* m_pSceneLoading = nullptr;
 	eng::IResource* m_pResource = nullptr;
+	Physics m_physics;
 };
